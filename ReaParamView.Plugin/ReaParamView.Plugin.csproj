@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <AssemblyName>reaper_reafxview</AssemblyName>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PublishAot>true</PublishAot>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <!-- Required: tells the AOT linker to produce a true native shared library (DLL)
+             with a proper export table. Without this, [UnmanagedCallersOnly] exports
+             will NOT appear in the PE export table and LoadLibrary/GetProcAddress won't work. -->
+        <NativeLib>Shared</NativeLib>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\ReaSharp\ReaSharp\ReaSharp.csproj" />
+        <ProjectReference Include="..\ReaParamView.Types\ReaParamView.Types.csproj" />
+    </ItemGroup>
+
+</Project>
