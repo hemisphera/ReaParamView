@@ -19,7 +19,7 @@
             @{
                 var bySlot = (msg.Envelopes ?? []).ToDictionary(e => e.Slot);
             }
-            @for (var slot = 0; slot < 8; slot++)
+            @for (var slot = 1; slot <= 8; slot++)
             {
                 if (bySlot.TryGetValue(slot, out var param))
                 {

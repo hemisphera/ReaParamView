@@ -81,6 +81,7 @@ html, body {
     transition: border-color 0.2s, box-shadow 0.2s;
     position: relative;
     overflow: hidden;
+    min-height: 140px;
 }
 
 .pd-card::before {
