@@ -16,7 +16,7 @@ public static class Plugin
   {
     var settingsPath = Path.Combine(
       Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-      "realoop.json");
+      "reaparamview.json");
     var host = Host.CreateDefaultBuilder()
       .ConfigureLogging(lb =>
       {
@@ -46,8 +46,9 @@ public static class Plugin
 
       return 1;
     }
-    catch
+    catch (Exception ex)
     {
+      ReaperConsoleLogger.WriteLog("Failed to initialize ReaParamView plugin: " + ex.Message);
       return 0;
     }
   }

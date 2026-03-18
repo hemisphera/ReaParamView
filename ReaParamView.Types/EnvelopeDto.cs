@@ -3,6 +3,7 @@
 public class EnvelopeDto
 {
   public string? Name { get; set; }
+  public int Slot { get; set; }
   public double Value { get; set; }
   public double Percentage { get; set; }
 }

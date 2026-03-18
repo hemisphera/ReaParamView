@@ -12,22 +12,32 @@
         <header class="pd-header">
             <div class="pd-header-label">Track</div>
             <div class="pd-header-name">@msg.TrackName</div>
-            <div class="pd-header-count">@Math.Min(msg.Envelopes?.Count ?? 0, 8) parameters</div>
+            <div class="pd-header-count">@(msg.Envelopes?.Count ?? 0) parameters</div>
         </header>
 
         <div class="pd-grid">
-            @foreach (var param in (msg.Envelopes ?? []).Take(8))
+            @{
+                var bySlot = (msg.Envelopes ?? []).ToDictionary(e => e.Slot);
+            }
+            @for (var slot = 0; slot < 8; slot++)
             {
-                var pct = Math.Clamp(param.Percentage, 0.0, 1.0) * 100.0;
-                <div class="pd-card">
-                    <div class="pd-card-name" title="@param.Name">@param.Name</div>
-                    <div class="pd-card-pct">@pct.ToString("F1")%</div>
-                    <div class="pd-bar-track">
-                        <div class="pd-bar-fill"
-                             style="width: @pct.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                if (bySlot.TryGetValue(slot, out var param))
+                {
+                    var pct = Math.Clamp(param.Percentage, 0.0, 1.0) * 100.0;
+                    <div class="pd-card">
+                        <div class="pd-card-name" title="@param.Name">@param.Name</div>
+                        <div class="pd-card-pct">@pct.ToString("F1")%</div>
+                        <div class="pd-bar-track">
+                            <div class="pd-bar-fill"
+                                 style="width: @pct.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                        </div>
+                        <div class="pd-card-value">@param.Value.ToString("F4")</div>
                     </div>
-                    <div class="pd-card-value">@param.Value.ToString("F4")</div>
-                </div>
+                }
+                else
+                {
+                    <div class="pd-card pd-card-empty"></div>
+                }
             }
         </div>
     }

@@ -97,6 +97,16 @@ html, body {
     box-shadow: 0 0 20px rgba(0,212,170,0.08);
 }
 
+.pd-card-empty {
+    background: rgba(255,255,255,0.015);
+    border-color: rgba(255,255,255,0.04);
+    pointer-events: none;
+}
+
+.pd-card-empty::before {
+    display: none;
+}
+
 /* Parameter name */
 .pd-card-name {
     font-size: 0.72rem;

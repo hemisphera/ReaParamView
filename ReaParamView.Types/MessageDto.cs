@@ -7,6 +7,7 @@ namespace ReaParamView.Types;
 ///   [track name length: 1 byte][track name: N bytes]
 ///   [envelope count: 1 byte]
 ///   Per envelope:
+///     [slot: 1 byte]
 ///     [name length: 1 byte][name: N bytes]
 ///     [value: float32, 4 bytes]
 ///     [percentage: float32, 4 bytes]
@@ -30,6 +31,7 @@ public class MessageDto
 
     foreach (var env in envelopes)
     {
+      writer.Write((byte)env.Slot);
       WriteShortString(writer, env.Name ?? string.Empty);
       writer.Write((float)env.Value);
       writer.Write((float)env.Percentage);
@@ -51,12 +53,12 @@ public class MessageDto
     {
       envelopes.Add(new EnvelopeDto
       {
+        Slot = reader.ReadByte(),
         Name = ReadShortString(reader),
         Value = reader.ReadSingle(),
         Percentage = reader.ReadSingle()
       });
     }
-
     return new MessageDto { TrackName = trackName, Envelopes = envelopes };
   }
 
