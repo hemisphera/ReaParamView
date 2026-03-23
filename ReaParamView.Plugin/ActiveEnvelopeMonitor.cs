@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ReaParamView.Types;
 using ReaSharp.Models;
 
@@ -9,6 +10,7 @@ public class ActiveEnvelopeMonitor
 {
   private readonly ILogger<ActiveEnvelopeMonitor> _logger;
   private readonly ITransport _transport;
+  private readonly IOptionsMonitor<MonitorSettings> _settings;
 
   private const int MaxSlots = 8;
   private static readonly Regex ExplicitSlotPattern = new(@"^@(\d+)\s*", RegexOptions.Compiled);
@@ -18,10 +20,11 @@ public class ActiveEnvelopeMonitor
   private CancellationTokenSource? _cancellationTokenSource;
 
 
-  public ActiveEnvelopeMonitor(ILogger<ActiveEnvelopeMonitor> logger, ITransport transport)
+  public ActiveEnvelopeMonitor(ILogger<ActiveEnvelopeMonitor> logger, ITransport transport, IOptionsMonitor<MonitorSettings> settings)
   {
     _logger = logger;
     _transport = transport;
+    _settings = settings;
   }
 
 
@@ -29,7 +32,7 @@ public class ActiveEnvelopeMonitor
   {
     _cancellationTokenSource = new CancellationTokenSource();
     var token = _cancellationTokenSource.Token;
-    _ = StartSending(token);
+    _ = SenderLoop(token);
   }
 
   public async Task Stop()
@@ -39,16 +42,16 @@ public class ActiveEnvelopeMonitor
   }
 
 
-  private async Task StartSending(CancellationToken token)
+  private async Task SenderLoop(CancellationToken token)
   {
     while (!token.IsCancellationRequested)
     {
-      await Task.Delay(250, token);
+      var settings = _settings.CurrentValue;
+      await Task.Delay(settings.UpdateIntervalMs, token);
 
       var selectedTrack = Project.Default.GetSelectedTracks().FirstOrDefault();
       _envelopes = selectedTrack?.EnumerateTrackEnvelopes().Where(env => env.Active).ToArray() ?? [];
       _message.TrackName = selectedTrack?.Name ?? string.Empty;
-
       _message.Envelopes = BuildEnvelopes(_envelopes);
 
       try
@@ -57,7 +60,7 @@ public class ActiveEnvelopeMonitor
       }
       catch (Exception ex)
       {
-        _logger.LogWarning($"Failed to send envelope values to server: {ex.Message}");
+        _logger.LogDebug($"Failed to send envelope values to server: {ex.Message}");
       }
     }
   }

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ReaSharp;
 
 namespace ReaParamView.Plugin;
@@ -18,28 +19,35 @@ public static class Plugin
       Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
       "reaparamview.json");
     var host = Host.CreateDefaultBuilder()
-      .ConfigureLogging(lb =>
+      .ConfigureLogging((context, lb) =>
       {
         lb.ClearProviders();
+        lb.SetMinimumLevel(LogLevel.Error);
+        lb.AddConfiguration(context.Configuration.GetSection("Logging"));
         lb.AddProvider(new ReaperConsoleLoggerProvider());
       })
-      .ConfigureServices((_, sc) =>
+      .ConfigureServices((context, sc) =>
       {
-        //sc.AddOptions<Settings>().BindConfiguration(nameof(Settings));
+        sc.Configure<MonitorSettings>(context.Configuration.GetSection(nameof(MonitorSettings)));
         sc.AddSingleton<ICommandRegistry, DefaultCommandRegistry>();
         sc.AddSingleton<ActiveEnvelopeMonitor>();
         sc.AddSingleton<ITransport, UdpTransport>();
       })
-      .ConfigureAppConfiguration(cfg => cfg.AddJsonFile(settingsPath, optional: true, reloadOnChange: false))
+      .ConfigureAppConfiguration(cfg => { cfg.AddJsonFile(settingsPath, optional: true, reloadOnChange: false); })
       .Build();
 
     try
     {
       var state = PluginState.Initialize(ReaperPluginInfo.FromPointer(rec), host);
-      var commands = state.Commands ?? throw new Exception();
-      //commands.Register("REAFXVIEW_DEBUG", "ReaParamView.Plugin: Print debug info", async () => await Instance.Test());
       var logger = state.Services.GetService<ILogger<ActiveEnvelopeMonitor>>();
-      logger?.LogInformation("FxMonitor initialized");
+      if (logger != null && logger.IsEnabled(LogLevel.Debug))
+      {
+        var options = state.Services.GetRequiredService<IOptions<MonitorSettings>>().Value;
+        logger.LogDebug("{Key}: {Value}", nameof(options.Host), options.Host);
+        logger.LogDebug("{Key}: {Value}", nameof(options.Port), options.Port);
+        logger.LogDebug("{Key}: {Value}", nameof(options.UpdateIntervalMs), options.UpdateIntervalMs);
+      }
+      logger?.LogDebug("FxMonitor initialized");
 
       var monitor = state.Services.GetRequiredService<ActiveEnvelopeMonitor>();
       _ = monitor.Start();
