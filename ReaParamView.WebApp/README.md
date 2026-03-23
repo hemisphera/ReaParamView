@@ -94,41 +94,6 @@ Modify `appsettings.json` to control logging verbosity:
 - `Critical`: Critical errors
 - `None`: No logging
 
-## Troubleshooting
-
-### No Data Received
-
-- **Check plugin is running**: Verify REAPER is running with the ReaParamView plugin installed
-- **Check track selection**: Select a track with active envelopes in REAPER
-- **Check network**: Verify network connectivity between plugin host and WebApp host
-- **Check firewall**: Ensure UDP port 9000 (or configured port) is not blocked
-- **Check configuration**: Verify plugin `MonitorSettings.Host` and `MonitorSettings.Port` match WebApp configuration
-- **Check logs**: Review WebApp logs for UDP receiver errors
-
-### Envelopes Not Showing
-
-- **Enable envelopes**: Ensure envelopes are enabled (active) in REAPER
-- **Configure envelope names**: Check envelope naming follows the `@N Name` format if explicit slot assignment is needed
-- **Check slot limits**: Only 8 parameters are displayed; verify the track doesn't have more than 8 active envelopes
-
-### WebApp Won't Start
-
-- **Port in use**: Verify port 5000 (or configured port) is available
-- **Build errors**: Ensure .NET 10.0 is installed: `dotnet --version`
-- **Dependency issues**: Try restoring dependencies: `dotnet restore`
-
-### Connection Timeouts
-
-- **Firewall**: Check Windows Firewall settings for UDP port 9000
-- **Network timeout**: Increase `UpdateIntervalMs` in plugin configuration if network is slow
-- **Router**: Verify router allows UDP traffic between hosts
-
-
-
 ### Customizing the UI
 
 To customize the appearance, edit the CSS file at `wwwroot/app.css`. The main page layout is in `Components/Pages/Home.razor`.
-
-## License
-
-See project LICENSE for details.

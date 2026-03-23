@@ -51,7 +51,6 @@ Complete documentation for the REAPER plugin including:
 - Installation and setup
 - Configuration options (Host, Port, Update Interval)
 - Envelope configuration and slot assignment
-- Troubleshooting
 
 ### [WebApp Documentation](ReaParamView.WebApp/README.md)
 
@@ -60,7 +59,6 @@ Complete documentation for the web application including:
 - Running the application
 - Configuration options
 - UI customization
-- Troubleshooting
 
 ## Configuration
 
@@ -152,56 +150,3 @@ Update plugin configuration to send every 100ms instead of default 250ms:
 ### Customize Parameter Display
 
 Edit the UI component at `ReaParamView.WebApp/Components/Pages/Home.razor` to modify grid layout, colors, or information displayed.
-
-## Troubleshooting
-
-### Plugin not loading
-See [Plugin Documentation - Troubleshooting](ReaParamView.Plugin/README.md#troubleshooting)
-
-### No data in web app
-See [WebApp Documentation - Troubleshooting](ReaParamView.WebApp/README.md#troubleshooting)
-
-### Network connectivity issues
-- Verify both machines are on the same network
-- Check firewall settings allow UDP on configured port
-- Verify plugin Host setting matches WebApp listening address
-- Test with `127.0.0.1` first before attempting remote connections
-
-### Port conflicts
-- Plugin sends UDP to `Host:Port` (default `127.0.0.1:9000`)
-- WebApp listens on HTTP port (default `5000`) and UDP port (default `9000`)
-- Ensure both ports are available
-
-## Development
-
-### Building from Source
-
-```powershell
-# Build everything
-dotnet build -c Release
-
-# Build specific project
-cd ReaParamView.Plugin
-dotnet build -c Release
-
-# Run tests
-dotnet test
-
-# Run WebApp in development
-cd ReaParamView.WebApp
-dotnet run
-```
-
-
-
-## License
-
-See LICENSE file for details.
-
-## Support
-
-For detailed information about each component:
-- [Plugin Documentation](ReaParamView.Plugin/README.md)
-- [WebApp Documentation](ReaParamView.WebApp/README.md)
-
-For setup issues or feature requests, refer to the troubleshooting sections in each component's documentation.
