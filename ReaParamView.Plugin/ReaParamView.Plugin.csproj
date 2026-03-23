@@ -14,7 +14,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\ReaSharp\ReaSharp\ReaSharp.csproj" />
+        <PackageReference Include="Hsp.ReaSharp" Version="*" />
         <ProjectReference Include="..\ReaParamView.Types\ReaParamView.Types.csproj" />
     </ItemGroup>
 

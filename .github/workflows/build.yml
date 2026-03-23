@@ -1,0 +1,73 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+
+jobs:
+
+  # ── WebApp ──────────────────────────────────────────────────────────────────
+  build-webapp:
+    name: Build WebApp
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish WebApp (framework-dependent)
+        run: >
+          dotnet publish ReaParamView.WebApp/ReaParamView.WebApp.csproj
+          -c Release
+          --no-self-contained
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: webapp
+          path: ReaParamView.WebApp/bin/Release/net10.0/publish/
+
+  # ── Plugin (native AOT, per-platform) ───────────────────────────────────────
+  build-plugin:
+    name: Build Plugin (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            artifact: reaper_reafxview.dll
+          - os: ubuntu-latest
+            rid: linux-x64
+            artifact: reaper_reafxview.so
+          - os: macos-latest
+            rid: osx-arm64
+            artifact: reaper_reafxview.dylib
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # Native AOT on Linux requires clang and zlib headers.
+      - name: Install native build tools (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y clang zlib1g-dev
+
+      - name: Publish Plugin
+        run: >
+          dotnet publish ReaParamView.Plugin/ReaParamView.Plugin.csproj
+          -r ${{ matrix.rid }}
+          -c Release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugin-${{ matrix.rid }}
+          path: ReaParamView.Plugin/bin/Release/net10.0/${{ matrix.rid }}/publish/${{ matrix.artifact }}

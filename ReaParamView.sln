@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaParamView.Plugin", "ReaP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaParamView.Types", "ReaParamView.Types\ReaParamView.Types.csproj", "{BD4F506C-3DC7-41F3-B605-74D498827D97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaSharp", "..\ReaSharp\ReaSharp\ReaSharp.csproj", "{692F4BA7-43C9-410D-B576-9A6AA2CBED56}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaParamView.WebApp", "ReaParamView.WebApp\ReaParamView.WebApp.csproj", "{DBBCC313-FAF5-4B99-94C9-E0E904D87855}"
 EndProject
 Global
@@ -22,10 +20,6 @@ Global
 		{BD4F506C-3DC7-41F3-B605-74D498827D97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD4F506C-3DC7-41F3-B605-74D498827D97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD4F506C-3DC7-41F3-B605-74D498827D97}.Release|Any CPU.Build.0 = Release|Any CPU
-		{692F4BA7-43C9-410D-B576-9A6AA2CBED56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{692F4BA7-43C9-410D-B576-9A6AA2CBED56}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{692F4BA7-43C9-410D-B576-9A6AA2CBED56}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{692F4BA7-43C9-410D-B576-9A6AA2CBED56}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DBBCC313-FAF5-4B99-94C9-E0E904D87855}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DBBCC313-FAF5-4B99-94C9-E0E904D87855}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBBCC313-FAF5-4B99-94C9-E0E904D87855}.Release|Any CPU.ActiveCfg = Release|Any CPU
