@@ -7,10 +7,21 @@ on:
 
 jobs:
 
-  # ── WebApp ──────────────────────────────────────────────────────────────────
+  # ── WebApp (framework-dependent, per-platform) ─────────────────────────────────
   build-webapp:
-    name: Build WebApp
-    runs-on: ubuntu-latest
+    name: Build WebApp (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: macos-latest
+            rid: osx-arm64
 
     steps:
       - uses: actions/checkout@v4
@@ -22,13 +33,14 @@ jobs:
       - name: Publish WebApp (framework-dependent)
         run: >
           dotnet publish ReaParamView.WebApp/ReaParamView.WebApp.csproj
+          -r ${{ matrix.rid }}
           -c Release
           --no-self-contained
 
       - uses: actions/upload-artifact@v4
         with:
-          name: webapp
-          path: ReaParamView.WebApp/bin/Release/net10.0/publish/
+          name: webapp-${{ matrix.rid }}
+          path: ReaParamView.WebApp/bin/Release/net10.0/${{ matrix.rid }}/publish/
 
   # ── Plugin (native AOT, per-platform) ───────────────────────────────────────
   build-plugin:
