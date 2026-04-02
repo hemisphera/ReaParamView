@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ReaParamView.Types;
 using ReaSharp.Models;
@@ -8,12 +7,12 @@ namespace ReaParamView.Plugin;
 
 public class ActiveEnvelopeMonitor
 {
+  internal const int MaxSlots = 8;
+
   private readonly ILogger<ActiveEnvelopeMonitor> _logger;
   private readonly ITransport _transport;
   private readonly IOptionsMonitor<MonitorSettings> _settings;
 
-  private const int MaxSlots = 8;
-  private static readonly Regex ExplicitSlotPattern = new(@"^@(\d+)\s*", RegexOptions.Compiled);
 
   private TrackFxEnvelope[] _envelopes = [];
   private readonly MessageDto _message = new();
@@ -67,37 +66,48 @@ public class ActiveEnvelopeMonitor
 
   private static List<EnvelopeDto> BuildEnvelopes(TrackFxEnvelope[] envelopes)
   {
-    var slots = new EnvelopeDto?[MaxSlots];
-    var unassigned = new List<(TrackFxEnvelope Env, string DisplayName)>();
+    // Create envelope data once with all values and formatting extracted upfront
+    var envelopeData = envelopes
+      .Select(env => new EnvelopeData(env))
+      .ToList();
 
-    foreach (var env in envelopes)
+    var slots = new EnvelopeDto?[MaxSlots];
+
+    // Process explicitly slotted envelopes
+    foreach (var data in envelopeData.Where(d => d.ExplicitSlot.HasValue))
     {
-      var rawName = (env.Name ?? "<no name>").Split('/').First().Trim();
-      var match = ExplicitSlotPattern.Match(rawName);
-      if (match.Success && int.TryParse(match.Groups[1].Value, out var idx) && idx >= 1 && idx <= MaxSlots)
-      {
-        var displayName = rawName[match.Length..];
-        if (string.IsNullOrWhiteSpace(displayName)) displayName = rawName;
-        var val = env.GetValue();
-        var slotIndex = idx - 1; // Convert 1-based to 0-based array index
-        slots[slotIndex] ??= new EnvelopeDto { Name = displayName, Slot = idx, Value = val.Value, Percentage = val.Percentage };
-      }
-      else
-      {
-        unassigned.Add((env, rawName));
-      }
+      if (data.ExplicitSlot == null) continue;
+      var slotIndex = data.ExplicitSlot.Value - 1; // Convert 1-based to 0-based array index
+      slots[slotIndex] ??= CreateEnvelopeDto(data, data.ExplicitSlot.Value);
     }
 
+    // Process unassigned envelopes in order
+    var unassigned = envelopeData
+      .Where(d => !d.ExplicitSlot.HasValue)
+      .OrderBy(d => d.DisplayName)
+      .ToList();
+
     var slotIdx = 0;
-    foreach (var (env, displayName) in unassigned.OrderBy(r => r.DisplayName))
+    foreach (var data in unassigned)
     {
       while (slotIdx < MaxSlots && slots[slotIdx] != null) slotIdx++;
       if (slotIdx >= MaxSlots) break;
-      var val = env.GetValue();
-      slots[slotIdx] = new EnvelopeDto { Name = displayName, Slot = slotIdx + 1, Value = val.Value, Percentage = val.Percentage };
+      slots[slotIdx] = CreateEnvelopeDto(data, slotIdx + 1);
       slotIdx++;
     }
 
     return slots.Where(s => s != null).Cast<EnvelopeDto>().ToList();
+  }
+
+  private static EnvelopeDto CreateEnvelopeDto(EnvelopeData data, int slot)
+  {
+    return new EnvelopeDto
+    {
+      Name = data.DisplayName,
+      Slot = slot,
+      Value = data.Value,
+      Percentage = data.Percentage,
+      FormattedValue = data.FormattedValue
+    };
   }
 }

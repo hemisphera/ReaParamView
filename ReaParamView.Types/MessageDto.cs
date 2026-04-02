@@ -11,6 +11,7 @@ namespace ReaParamView.Types;
 ///     [name length: 1 byte][name: N bytes]
 ///     [value: float32, 4 bytes]
 ///     [percentage: float32, 4 bytes]
+///     [formatted value length: 1 byte][formatted value: N bytes]
 /// float32 is used instead of float64 — more than sufficient precision for audio parameters.
 /// </summary>
 public class MessageDto
@@ -35,6 +36,7 @@ public class MessageDto
       WriteShortString(writer, env.Name ?? string.Empty);
       writer.Write((float)env.Value);
       writer.Write((float)env.Percentage);
+      WriteShortString(writer, env.FormattedValue);
     }
 
     return ms.ToArray();
@@ -56,7 +58,8 @@ public class MessageDto
         Slot = reader.ReadByte(),
         Name = ReadShortString(reader),
         Value = reader.ReadSingle(),
-        Percentage = reader.ReadSingle()
+        Percentage = reader.ReadSingle(),
+        FormattedValue = ReadShortString(reader)
       });
     }
     return new MessageDto { TrackName = trackName, Envelopes = envelopes };
