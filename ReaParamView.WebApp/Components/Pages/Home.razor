@@ -26,12 +26,12 @@
                     var pct = Math.Clamp(param.Percentage, 0.0, 1.0) * 100.0;
                     <div class="pd-card">
                         <div class="pd-card-name" title="@param.Name">@param.Name</div>
-                        <div class="pd-card-pct">@pct.ToString("F1")%</div>
+                        <div class="pd-card-pct">@(string.IsNullOrEmpty(param.FormattedValue) ? param.Value.ToString("F4") : param.FormattedValue)</div>
                         <div class="pd-bar-track">
                             <div class="pd-bar-fill"
                                  style="width: @pct.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%"></div>
                         </div>
-                        <div class="pd-card-value">@param.Value.ToString("F4")</div>
+                        <div class="pd-card-value">@pct.ToString("F0")%</div>
                     </div>
                 }
                 else

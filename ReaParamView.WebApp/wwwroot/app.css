@@ -15,13 +15,14 @@ html, body {
 
 /* ─── Parameter Display wrapper ──────────────────────────── */
 .pd-wrapper {
-    min-height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2rem 1.5rem;
-    gap: 2rem;
+    padding: 0.4rem 0.5rem;
+    gap: 0.5rem;
 }
 
 /* ─── Header ──────────────────────────────────────────────── */
@@ -30,13 +31,15 @@ html, body {
     align-items: baseline;
     gap: 0.75rem;
     width: 100%;
-    max-width: 1100px;
+    max-width: 1200px;
+    padding: 0 0.5rem;
     border-bottom: 1px solid rgba(255,255,255,0.08);
-    padding-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    flex-wrap: wrap;
 }
 
 .pd-header-label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -44,44 +47,78 @@ html, body {
     opacity: 0.85;
 }
 
+@media (min-width: 1024px) {
+    .pd-header-label {
+        font-size: 0.7rem;
+    }
+}
+
 .pd-header-name {
-    font-size: 1.6rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #f0f4ff;
     letter-spacing: -0.02em;
     flex: 1;
 }
 
+@media (min-width: 1024px) {
+    .pd-header-name {
+        font-size: 1.1rem;
+    }
+}
+
 .pd-header-count {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #64748b;
     font-weight: 500;
 }
 
-/* ─── Parameter grid (4 columns, max 2 rows) ─────────────── */
+@media (min-width: 1024px) {
+    .pd-header-count {
+        font-size: 0.75rem;
+    }
+}
+
+/* ─── Parameter grid (responsive layout) ────────────────── */
 .pd-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: auto auto;
-    gap: 1.25rem;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto;
+    gap: 0.75rem;
     width: 100%;
-    max-width: 1100px;
+    max-width: 1200px;
+    padding: 0 0.75rem;
+    aspect-ratio: auto;
+}
+
+@media (orientation: landscape) {
+    .pd-grid {
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+    }
 }
 
 /* ─── Parameter card ─────────────────────────────────────── */
 .pd-card {
     background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    padding: 1.25rem 1.25rem 1rem;
+    border-radius: 10px;
+    padding: 0.5rem 0.6rem;
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
+    justify-content: center;
+    gap: 0.3rem;
     backdrop-filter: blur(8px);
     transition: border-color 0.2s, box-shadow 0.2s;
     position: relative;
     overflow: hidden;
-    min-height: 140px;
+    min-height: 60px;
+}
+
+@media (orientation: landscape) {
+    .pd-card {
+        min-height: 80px;
+    }
 }
 
 .pd-card::before {
@@ -110,7 +147,7 @@ html, body {
 
 /* Parameter name */
 .pd-card-name {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -118,6 +155,12 @@ html, body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+@media (min-width: 1024px) {
+    .pd-card-name {
+        font-size: 0.75rem;
+    }
 }
 
 /* Numeric value */
@@ -129,12 +172,24 @@ html, body {
     font-variant-numeric: tabular-nums;
 }
 
+@media (min-width: 1024px) {
+    .pd-card-value {
+        font-size: 0.8rem;
+    }
+}
+
 /* Progress bar track */
 .pd-bar-track {
     height: 5px;
     background: rgba(255,255,255,0.08);
     border-radius: 999px;
     overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+    .pd-bar-track {
+        height: 6px;
+    }
 }
 
 .pd-bar-fill {
@@ -147,12 +202,18 @@ html, body {
 
 /* Percentage label */
 .pd-card-pct {
-    font-size: 1.75rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #00d4aa;
     letter-spacing: -0.03em;
     line-height: 1;
     font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 1024px) {
+    .pd-card-pct {
+        font-size: 1.4rem;
+    }
 }
 
 /* ─── Idle / waiting state ───────────────────────────────── */
