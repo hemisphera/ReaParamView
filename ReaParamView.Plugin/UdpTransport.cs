@@ -14,6 +14,16 @@ public class UdpTransport : ITransport
     _settings = settings.Value;
   }
 
+  public Task StartAsync(CancellationToken ct)
+  {
+    return Task.CompletedTask;
+  }
+
+  public Task StopAsync(CancellationToken ct)
+  {
+    return Task.CompletedTask;
+  }
+
   public async Task SendMessage(MessageDto message, CancellationToken token)
   {
     await _udpClient.SendAsync(message.SerializeBinary(), _settings.Host, _settings.Port, token);

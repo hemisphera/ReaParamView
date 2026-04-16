@@ -8,6 +8,16 @@ public class RestTransport : ITransport
   private readonly Uri _baseUri = new("http://localhost:5079/api/parameters");
 
 
+  public Task StartAsync(CancellationToken ct)
+  {
+    return Task.CompletedTask;
+  }
+
+  public Task StopAsync(CancellationToken ct)
+  {
+    return Task.CompletedTask;
+  }
+
   public async Task SendMessage(MessageDto message, CancellationToken token)
   {
     await _httpClient.SendAsync(new HttpRequestMessage

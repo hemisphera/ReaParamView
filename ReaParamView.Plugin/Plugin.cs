@@ -22,7 +22,6 @@ public static class Plugin
       .ConfigureLogging((context, lb) =>
       {
         lb.ClearProviders();
-        lb.SetMinimumLevel(LogLevel.Error);
         lb.AddConfiguration(context.Configuration.GetSection("Logging"));
         lb.AddProvider(new ReaperConsoleLoggerProvider());
       })
@@ -31,7 +30,7 @@ public static class Plugin
         sc.Configure<MonitorSettings>(context.Configuration.GetSection(nameof(MonitorSettings)));
         sc.AddSingleton<ICommandRegistry, DefaultCommandRegistry>();
         sc.AddSingleton<ActiveEnvelopeMonitor>();
-        sc.AddSingleton<ITransport, UdpTransport>();
+        sc.AddSingleton<ITransport, OscTransport>();
       })
       .ConfigureAppConfiguration(cfg => { cfg.AddJsonFile(settingsPath, optional: true, reloadOnChange: false); })
       .Build();

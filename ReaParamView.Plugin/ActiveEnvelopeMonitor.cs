@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Collections;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ReaParamView.Types;
 using ReaSharp.Models;
@@ -43,71 +44,74 @@ public class ActiveEnvelopeMonitor
 
   private async Task SenderLoop(CancellationToken token)
   {
-    while (!token.IsCancellationRequested)
+    try
     {
-      var settings = _settings.CurrentValue;
-      await Task.Delay(settings.UpdateIntervalMs, token);
-
-      var selectedTrack = Project.Default.GetSelectedTracks().FirstOrDefault();
-      _envelopes = selectedTrack?.EnumerateTrackEnvelopes().Where(env => env.Active).ToArray() ?? [];
-      _message.TrackName = selectedTrack?.Name ?? string.Empty;
-      _message.Envelopes = BuildEnvelopes(_envelopes);
-
-      try
+      await _transport.StartAsync(token);
+      while (!token.IsCancellationRequested)
       {
-        await _transport.SendMessage(_message, token);
+        var settings = _settings.CurrentValue;
+        await Task.Delay(settings.UpdateIntervalMs, token);
+
+        var selectedTrack = Project.Default.GetSelectedTracks().FirstOrDefault();
+        _envelopes = selectedTrack?.EnumerateTrackEnvelopes().Where(env => env.Active).ToArray() ?? [];
+        _message.TrackName = selectedTrack?.Name ?? string.Empty;
+        _message.Envelopes = BuildEnvelopes(_envelopes);
+
+        try
+        {
+          await _transport.SendMessage(_message, token);
+        }
+        catch (Exception ex)
+        {
+          _logger.LogDebug($"Failed to send envelope values to server: {ex.Message}");
+        }
       }
-      catch (Exception ex)
-      {
-        _logger.LogDebug($"Failed to send envelope values to server: {ex.Message}");
-      }
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, ex.Message);
+    }
+    finally
+    {
+      await _transport.StopAsync(token);
     }
   }
 
   private static List<EnvelopeDto> BuildEnvelopes(TrackFxEnvelope[] envelopes)
   {
-    // Create envelope data once with all values and formatting extracted upfront
     var envelopeData = envelopes
       .Select(env => new EnvelopeData(env))
       .ToList();
 
     var slots = new EnvelopeDto?[MaxSlots];
-
-    // Process explicitly slotted envelopes
-    foreach (var data in envelopeData.Where(d => d.ExplicitSlot.HasValue))
+    foreach (var data in envelopeData.Where(d => d.ExplicitSlot.HasValue).ToArray())
     {
       if (data.ExplicitSlot == null) continue;
       var slotIndex = data.ExplicitSlot.Value - 1; // Convert 1-based to 0-based array index
-      slots[slotIndex] ??= CreateEnvelopeDto(data, data.ExplicitSlot.Value);
+      slots[slotIndex] = CreateEnvelopeDto(data, data.ExplicitSlot.Value);
+      envelopeData.Remove(data);
     }
 
-    // Process unassigned envelopes in order
-    var unassigned = envelopeData
-      .Where(d => !d.ExplicitSlot.HasValue)
-      .OrderBy(d => d.DisplayName)
-      .ToList();
-
-    var slotIdx = 0;
-    foreach (var data in unassigned)
+    var unassigned = new Queue<EnvelopeData>(envelopeData.OrderBy(d => d.DisplayName));
+    for (var i = 0; i < slots.Length; i++)
     {
-      while (slotIdx < MaxSlots && slots[slotIdx] != null) slotIdx++;
-      if (slotIdx >= MaxSlots) break;
-      slots[slotIdx] = CreateEnvelopeDto(data, slotIdx + 1);
-      slotIdx++;
+      if (slots[i] != null) continue;
+      var next = unassigned.Count > 0 ? unassigned.Dequeue() : null;
+      slots[i] = CreateEnvelopeDto(next, i);
     }
 
-    return slots.Where(s => s != null).Cast<EnvelopeDto>().ToList();
+    return slots.OfType<EnvelopeDto>().ToList();
   }
 
-  private static EnvelopeDto CreateEnvelopeDto(EnvelopeData data, int slot)
+  private static EnvelopeDto CreateEnvelopeDto(EnvelopeData? data, int slot)
   {
     return new EnvelopeDto
     {
-      Name = data.DisplayName,
+      Name = data?.DisplayName ?? string.Empty,
       Slot = slot,
-      Value = data.Value,
-      Percentage = data.Percentage,
-      FormattedValue = data.FormattedValue
+      Value = data?.Value ?? 0.0,
+      Percentage = data?.Percentage ?? 0,
+      FormattedValue = data?.FormattedValue ?? string.Empty
     };
   }
 }

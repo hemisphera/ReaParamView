@@ -14,6 +14,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Hsp.Osc" Version="0.0.23-beta1" />
         <PackageReference Include="Hsp.ReaSharp" Version="0.0.3" />
         <ProjectReference Include="..\ReaParamView.Types\ReaParamView.Types.csproj" />
     </ItemGroup>
