@@ -1,0 +1,58 @@
+@inject OscService OscService
+@implements IDisposable
+
+<div class="fx-wrapper">
+    <div class="fx-section-label">FX Parameters</div>
+    @if (_trackName != null)
+    {
+        <div class="fx-header">
+            <span class="fx-header-track">Track</span>
+            <span class="fx-header-name">@_trackName</span>
+        </div>
+    }
+    <div class="fx-grid">
+        @{
+            var bySlot = OscService.FxParameters.Envelopes.ToDictionary(e => e.Slot);
+        }
+        @for (var slot = 1; slot <= 8; slot++)
+        {
+            if (bySlot.TryGetValue(slot, out var param) && !string.IsNullOrEmpty(param.Name))
+            {
+                var pct = Math.Clamp(param.Value, 0.0, 1.0) * 100.0;
+                <div class="fx-card">
+                    <div class="fx-card-name" title="@param.Name">@param.Name</div>
+                    <div class="fx-card-value">@(string.IsNullOrEmpty(param.FormattedValue) ? param.Value.ToString("F4") : param.FormattedValue)</div>
+                    <div class="fx-bar-track">
+                        <div class="fx-bar-fill"
+                             style="width: @pct.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                    </div>
+                    <div class="fx-card-pct">@pct.ToString("F0")%</div>
+                </div>
+            }
+            else
+            {
+                <div class="fx-card fx-card-empty"></div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private string? _trackName;
+
+    protected override void OnInitialized()
+    {
+        OscService.FxParametersChanged += Refresh;
+    }
+
+    private void Refresh()
+    {
+        _trackName = OscService.FxParameters.TrackName;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        OscService.FxParametersChanged -= Refresh;
+    }
+}

@@ -10,8 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
   .AddInteractiveServerComponents();
 
-builder.Services.AddSingleton<ParameterDisplayService>();
-builder.Services.AddHostedService<OscReceiverService>();
+builder.Services.AddSingleton<OscService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<OscService>());
 
 var app = builder.Build();
 

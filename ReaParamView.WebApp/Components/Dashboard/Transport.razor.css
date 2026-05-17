@@ -1,0 +1,85 @@
+.tp-wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    overflow: hidden;
+}
+
+/* Status icon */
+.tp-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    transition: background 0.25s, box-shadow 0.25s;
+}
+
+.tp-icon--playing {
+    background: rgba(34, 197, 94, 0.18);
+    box-shadow: 0 0 24px rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+    border: 2px solid rgba(34, 197, 94, 0.45);
+}
+
+.tp-icon--recording {
+    background: rgba(239, 68, 68, 0.18);
+    box-shadow: 0 0 24px rgba(239, 68, 68, 0.35);
+    color: #ef4444;
+    border: 2px solid rgba(239, 68, 68, 0.5);
+    animation: tp-pulse 1s ease-in-out infinite;
+}
+
+.tp-icon--paused {
+    background: rgba(234, 179, 8, 0.18);
+    box-shadow: 0 0 18px rgba(234, 179, 8, 0.25);
+    color: #eab308;
+    border: 2px solid rgba(234, 179, 8, 0.4);
+}
+
+.tp-icon--stopped {
+    background: rgba(255,255,255,0.05);
+    color: #475569;
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+@keyframes tp-pulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(239, 68, 68, 0.3); }
+    50%       { box-shadow: 0 0 36px rgba(239, 68, 68, 0.6); }
+}
+
+/* Countdown */
+.tp-countdown {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+}
+
+.tp-countdown-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+    color: #e2e8f0;
+    line-height: 1;
+}
+
+.tp-countdown-idle {
+    color: #334155;
+}
+
+.tp-countdown-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #475569;
+}

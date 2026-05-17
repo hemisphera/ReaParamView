@@ -1,0 +1,61 @@
+@inject OscService OscService
+@implements IDisposable
+
+<div class="tp-wrapper">
+    <div class="fx-section-label">Transport</div>
+
+    <div class="tp-icon tp-icon--@_statusClass" title="@_statusLabel">
+        <span class="tp-icon-symbol">@_statusSymbol</span>
+    </div>
+
+    <div class="tp-countdown">
+        @if (OscService.Transport.RegionEnd > 0)
+        {
+            <span class="tp-countdown-value">@FormatTime(OscService.Transport.RemainingSeconds)</span>
+            <span class="tp-countdown-label">remaining</span>
+        }
+        else
+        {
+            <span class="tp-countdown-value tp-countdown-idle">--:--</span>
+        }
+    </div>
+</div>
+
+@code {
+    private System.Timers.Timer _timer = null!;
+    private string _statusClass = "stopped";
+    private string _statusLabel = "Stopped";
+    private string _statusSymbol = "■";
+
+    protected override void OnInitialized()
+    {
+        OscService.TransportChanged += Refresh;
+        _timer = new System.Timers.Timer(1000) { AutoReset = true };
+        _timer.Elapsed += (_, _) => InvokeAsync(StateHasChanged);
+        _timer.Start();
+    }
+
+    private void Refresh()
+    {
+        var t = OscService.Transport;
+        if (t.IsRecording)      { _statusClass = "recording"; _statusLabel = "Recording"; _statusSymbol = "●"; }
+        else if (t.IsPlaying)   { _statusClass = "playing";   _statusLabel = "Playing";   _statusSymbol = "▶"; }
+        else if (t.IsPaused)    { _statusClass = "paused";    _statusLabel = "Paused";    _statusSymbol = "⏸"; }
+        else                    { _statusClass = "stopped";   _statusLabel = "Stopped";   _statusSymbol = "■"; }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private static string FormatTime(double totalSeconds)
+    {
+        var ts = TimeSpan.FromSeconds(Math.Max(0, totalSeconds));
+        return ts.TotalHours >= 1
+            ? ts.ToString(@"h\:mm\:ss")
+            : ts.ToString(@"m\:ss");
+    }
+
+    public void Dispose()
+    {
+        OscService.TransportChanged -= Refresh;
+        _timer.Dispose();
+    }
+}

@@ -1,70 +1,19 @@
 ﻿@page "/"
 @rendermode InteractiveServer
-@using ReaParamView.WebApp.Services
-@inject ParameterDisplayService DisplayService
-@implements IDisposable
 
-<PageTitle>Parameter Display</PageTitle>
+<PageTitle>ReaParamView</PageTitle>
 
-<div class="pd-wrapper">
-    @if (DisplayService.CurrentMessage is { } msg)
-    {
-        <header class="pd-header">
-            <div class="pd-header-label">Track</div>
-            <div class="pd-header-name">@msg.TrackName</div>
-            <div class="pd-header-count">@(msg.Envelopes?.Count ?? 0) parameters</div>
-        </header>
-
-        <div class="pd-grid">
-            @{
-                var bySlot = (msg.Envelopes ?? []).ToDictionary(e => e.Slot);
-            }
-            @for (var slot = 1; slot <= 8; slot++)
-            {
-                if (bySlot.TryGetValue(slot, out var param))
-                {
-                    var pct = Math.Clamp(param.Percentage, 0.0, 1.0) * 100.0;
-                    <div class="pd-card">
-                        <div class="pd-card-name" title="@param.Name">@param.Name</div>
-                        <div class="pd-card-pct">@(string.IsNullOrEmpty(param.FormattedValue) ? param.Value.ToString("F4") : param.FormattedValue)</div>
-                        <div class="pd-bar-track">
-                            <div class="pd-bar-fill"
-                                 style="width: @pct.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%"></div>
-                        </div>
-                        <div class="pd-card-value">@pct.ToString("F0")%</div>
-                    </div>
-                }
-                else
-                {
-                    <div class="pd-card pd-card-empty"></div>
-                }
-            }
-        </div>
-    }
-    else
-    {
-        <div class="pd-idle">
-            <div class="pd-idle-pulse"></div>
-            <p>Waiting for parameters&hellip;</p>
-        </div>
-    }
+<div class="dashboard">
+    <div class="dashboard-tracks">
+        <TrackView />
+    </div>
+    <div class="dashboard-events">
+        <EventView />
+    </div>
+    <div class="dashboard-fx">
+        <FxParameterMatrix />
+    </div>
+    <div class="dashboard-transport">
+        <Transport />
+    </div>
 </div>
-
-@code {
-
-    protected override void OnInitialized()
-    {
-        DisplayService.OnChange += HandleUpdate;
-    }
-
-    private void HandleUpdate()
-    {
-        InvokeAsync(StateHasChanged);
-    }
-
-    public void Dispose()
-    {
-        DisplayService.OnChange -= HandleUpdate;
-    }
-
-}
