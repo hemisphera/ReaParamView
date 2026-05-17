@@ -5,8 +5,11 @@ namespace ReaParamView.Plugin;
 
 public class LinkedParameter
 {
-  public static LinkedParameter[] Load(Track track, RppNode trackNode)
+  public static LinkedParameter[] Load(Track track)
   {
+    if (!RppReader.TryRead(track.GetTrackStateChunk() ?? string.Empty, out var trackNode))
+      return [];
+
     var relativatorIndex = FindRelativatorIndex(trackNode);
     if (relativatorIndex == null) return [];
 

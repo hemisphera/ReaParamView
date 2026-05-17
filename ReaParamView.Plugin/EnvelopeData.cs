@@ -15,7 +15,7 @@ public class EnvelopeData
     var rawName = (parameter.Name ?? "<no name>").Split('/').First().Trim();
 
     DisplayName = rawName;
-    ExplicitSlot = lp.SourceFxParameterIndex - 2;
+    ExplicitSlot = lp.SourceFxParameterIndex - 1;
 
     var parameterValue = parameter.GetValue();
     var minValue = parameter.Minimum;

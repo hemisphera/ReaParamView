@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Options;
 using ReaParamView.Types;
 using ReaSharp.Models;
-using ReaSharp.RppXml;
 
 namespace ReaParamView.Plugin;
 
@@ -47,6 +46,14 @@ public class ActiveEnvelopeMonitor
   {
     while (!token.IsCancellationRequested)
     {
+      await TrySendUpdate(token);
+    }
+  }
+
+  private async Task TrySendUpdate(CancellationToken token)
+  {
+    try
+    {
       var settings = _settings.CurrentValue;
       await Task.Delay(settings.UpdateIntervalMs, token);
 
@@ -64,6 +71,10 @@ public class ActiveEnvelopeMonitor
         _logger.LogDebug("Failed to send envelope values to server: {msg}", ex.Message);
       }
     }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Update failed: {msg} - {stack}", ex.Message, ex.StackTrace);
+    }
   }
 
   private void UpdateCurrentTrack()
@@ -78,10 +89,11 @@ public class ActiveEnvelopeMonitor
       return;
     }
 
-    var chunk = _currentTrack.GetTrackStateChunk();
-    _linkedParameters = RppReader.TryRead(chunk ?? string.Empty, out var node)
-      ? LinkedParameter.Load(_currentTrack, node)
-      : [];
+    _linkedParameters = LinkedParameter.Load(_currentTrack);
+    foreach (var linkedParameter in _linkedParameters)
+    {
+      _logger.LogDebug("Loaded linked parameter: {lp}", linkedParameter);
+    }
   }
 
   private static List<EnvelopeDto> BuildParameters(LinkedParameter[] envelopes)
