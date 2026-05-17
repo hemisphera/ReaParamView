@@ -12,6 +12,16 @@ public class NullTransport : ITransport
     _logger = logger;
   }
 
+  public Task StartAsync(CancellationToken ct)
+  {
+    return Task.CompletedTask;
+  }
+
+  public Task StopAsync(CancellationToken ct)
+  {
+    return Task.CompletedTask;
+  }
+
   public async Task SendMessage(MessageDto message, CancellationToken token)
   {
     _logger.LogInformation("Tick");

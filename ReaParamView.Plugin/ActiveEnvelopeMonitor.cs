@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ReaParamView.Types;
 using ReaSharp.Models;
@@ -45,47 +44,34 @@ public class ActiveEnvelopeMonitor
 
   private async Task SenderLoop(CancellationToken token)
   {
-    while (!token.IsCancellationRequested)
-    {
-      await TrySendUpdate(token);
-    }
-  }
-
-  private async Task TrySendUpdate(CancellationToken token)
-  {
+    await _transport.StartAsync(token);
     try
     {
-      await _transport.StartAsync(token);
+      var settings = _settings.CurrentValue;
       while (!token.IsCancellationRequested)
       {
-      var settings = _settings.CurrentValue;
-      await Task.Delay(settings.UpdateIntervalMs, token);
+        {
+          await Task.Delay(settings.UpdateIntervalMs, token);
 
-      UpdateCurrentTrack();
+          UpdateCurrentTrack();
 
-      _message.TrackName = _currentTrack?.Name ?? string.Empty;
-      _message.Envelopes = BuildParameters(_linkedParameters);
+          _message.TrackName = _currentTrack?.Name ?? string.Empty;
+          _message.Envelopes = BuildParameters(_linkedParameters);
 
-      try
-      {
-        await _transport.SendMessage(_message, token);
+          try
+          {
+            await _transport.SendMessage(_message, token);
+          }
+          catch (Exception ex)
+          {
+            _logger.LogDebug($"Failed to send envelope values to server: {ex.Message}");
+          }
+        }
       }
-      catch (Exception ex)
-      {
-        _logger.LogDebug($"Failed to send envelope values to server: {ex.Message}");
-      }
-    }
-    catch (Exception ex)
-    {
-      _logger.LogError(ex, ex.Message);
     }
     finally
     {
       await _transport.StopAsync(token);
-    }
-    catch (Exception ex)
-    {
-      _logger.LogError(ex, "Update failed: {msg} - {stack}", ex.Message, ex.StackTrace);
     }
   }
 
