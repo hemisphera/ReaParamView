@@ -11,7 +11,7 @@ builder.Services.AddRazorComponents()
   .AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<ParameterDisplayService>();
-builder.Services.AddHostedService<UdpReceiverService>();
+builder.Services.AddHostedService<OscReceiverService>();
 
 var app = builder.Build();
 

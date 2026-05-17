@@ -45,7 +45,7 @@ public class OscTransport : ITransport
     if (_lastMessage.TrackName != message.TrackName)
     {
       bundle ??= [];
-      bundle.Add(new Message("/currenttrack/name").PushAtom(message.TrackName ?? string.Empty));
+      bundle.Add(new Message("/hulp/curr/name").PushAtom(message.TrackName ?? string.Empty));
       fullRefresh = true;
     }
 
@@ -57,9 +57,9 @@ public class OscTransport : ITransport
 
       bundle ??= [];
 
-      bundle.Add(new Message($"/currenttrack/fx/{i + 1}/name").PushAtom(newEnvelope?.Name ?? string.Empty));
-      bundle.Add(new Message($"/currenttrack/fx/{i + 1}/value/str").PushAtom(newEnvelope?.FormattedValue ?? string.Empty));
-      bundle.Add(new Message($"/currenttrack/fx/{i + 1}/value").PushAtom(newEnvelope?.Value ?? 0.0));
+      bundle.Add(new Message($"/hulp/curr/fx/{i + 1}/name").PushAtom(newEnvelope?.Name ?? string.Empty));
+      bundle.Add(new Message($"/hulp/curr/fx/{i + 1}/value/str").PushAtom(newEnvelope?.FormattedValue ?? string.Empty));
+      bundle.Add(new Message($"/hulp/curr/fx/{i + 1}/value").PushAtom(newEnvelope?.Value ?? 0.0));
     }
 
     if (bundle != null)

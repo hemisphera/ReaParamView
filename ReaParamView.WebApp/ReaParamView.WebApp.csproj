@@ -8,6 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Hsp.Osc" Version="0.0.23-beta1" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\ReaParamView.Types\ReaParamView.Types.csproj" />
     </ItemGroup>
 
