@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using ReaParamView.Types;
 using ReaSharp.Models;
+using ReaSharp.RppXml;
 
 namespace ReaParamView.Plugin;
 
@@ -14,7 +15,8 @@ public class ActiveEnvelopeMonitor
   private readonly IOptionsMonitor<MonitorSettings> _settings;
 
 
-  private TrackFxEnvelope[] _envelopes = [];
+  private Track? _currentTrack;
+  private LinkedParameter[] _linkedParameters = [];
   private readonly MessageDto _message = new();
   private CancellationTokenSource? _cancellationTokenSource;
 
@@ -48,10 +50,10 @@ public class ActiveEnvelopeMonitor
       var settings = _settings.CurrentValue;
       await Task.Delay(settings.UpdateIntervalMs, token);
 
-      var selectedTrack = Project.Default.GetSelectedTracks().FirstOrDefault();
-      _envelopes = selectedTrack?.EnumerateTrackEnvelopes().Where(env => env.Active).ToArray() ?? [];
-      _message.TrackName = selectedTrack?.Name ?? string.Empty;
-      _message.Envelopes = BuildEnvelopes(_envelopes);
+      UpdateCurrentTrack();
+
+      _message.TrackName = _currentTrack?.Name ?? string.Empty;
+      _message.Envelopes = BuildParameters(_linkedParameters);
 
       try
       {
@@ -59,12 +61,30 @@ public class ActiveEnvelopeMonitor
       }
       catch (Exception ex)
       {
-        _logger.LogDebug($"Failed to send envelope values to server: {ex.Message}");
+        _logger.LogDebug("Failed to send envelope values to server: {msg}", ex.Message);
       }
     }
   }
 
-  private static List<EnvelopeDto> BuildEnvelopes(TrackFxEnvelope[] envelopes)
+  private void UpdateCurrentTrack()
+  {
+    var selectedTrack = Project.Current.GetSelectedTrack();
+    if (selectedTrack?.ReaperHandle == _currentTrack?.ReaperHandle) return;
+
+    _currentTrack = selectedTrack;
+    if (_currentTrack == null)
+    {
+      _linkedParameters = [];
+      return;
+    }
+
+    var chunk = _currentTrack.GetTrackStateChunk();
+    _linkedParameters = RppReader.TryRead(chunk ?? string.Empty, out var node)
+      ? LinkedParameter.Load(_currentTrack, node)
+      : [];
+  }
+
+  private static List<EnvelopeDto> BuildParameters(LinkedParameter[] envelopes)
   {
     // Create envelope data once with all values and formatting extracted upfront
     var envelopeData = envelopes

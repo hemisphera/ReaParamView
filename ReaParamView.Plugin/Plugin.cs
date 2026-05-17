@@ -18,6 +18,7 @@ public static class Plugin
     var settingsPath = Path.Combine(
       Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
       "reaparamview.json");
+    
     var host = Host.CreateDefaultBuilder()
       .ConfigureLogging((context, lb) =>
       {
@@ -48,6 +49,9 @@ public static class Plugin
         logger.LogDebug("{Key}: {Value}", nameof(options.UpdateIntervalMs), options.UpdateIntervalMs);
       }
       logger?.LogDebug("FxMonitor initialized");
+
+      var registry = state.Services.GetRequiredService<ICommandRegistry>();
+      registry.Register("RPV_DEBUG", "Relativator: Debug", Commands.Debug);
 
       var monitor = state.Services.GetRequiredService<ActiveEnvelopeMonitor>();
       _ = monitor.Start();
