@@ -5,7 +5,7 @@ namespace ReaParamView.WebApp.Services;
 
 public class UdpReceiverService(ParameterDisplayService displayService, ILogger<UdpReceiverService> logger) : BackgroundService
 {
-  private const int Port = 9000;
+  private const int Port = 8000;
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {

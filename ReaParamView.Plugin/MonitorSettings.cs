@@ -9,7 +9,7 @@ public class MonitorSettings
     /// UDP host address where envelope data should be sent.
     /// Default: 127.0.0.1
     /// </summary>
-    public string Host { get; set; } = "loalhost";
+    public string Host { get; set; } = "localhost";
 
     /// <summary>
     /// UDP port where envelope data should be sent.

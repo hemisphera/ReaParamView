@@ -15,7 +15,8 @@ public class ActiveEnvelopeMonitor
   private readonly IOptionsMonitor<MonitorSettings> _settings;
 
 
-  private TrackFxEnvelope[] _envelopes = [];
+  private Track? _currentTrack;
+  private LinkedParameter[] _linkedParameters = [];
   private readonly MessageDto _message = new();
   private CancellationTokenSource? _cancellationTokenSource;
 
@@ -44,27 +45,34 @@ public class ActiveEnvelopeMonitor
 
   private async Task SenderLoop(CancellationToken token)
   {
+    while (!token.IsCancellationRequested)
+    {
+      await TrySendUpdate(token);
+    }
+  }
+
+  private async Task TrySendUpdate(CancellationToken token)
+  {
     try
     {
       await _transport.StartAsync(token);
       while (!token.IsCancellationRequested)
       {
-        var settings = _settings.CurrentValue;
-        await Task.Delay(settings.UpdateIntervalMs, token);
+      var settings = _settings.CurrentValue;
+      await Task.Delay(settings.UpdateIntervalMs, token);
 
-        var selectedTrack = Project.Default.GetSelectedTracks().FirstOrDefault();
-        _envelopes = selectedTrack?.EnumerateTrackEnvelopes().Where(env => env.Active).ToArray() ?? [];
-        _message.TrackName = selectedTrack?.Name ?? string.Empty;
-        _message.Envelopes = BuildEnvelopes(_envelopes);
+      UpdateCurrentTrack();
 
-        try
-        {
-          await _transport.SendMessage(_message, token);
-        }
-        catch (Exception ex)
-        {
-          _logger.LogDebug($"Failed to send envelope values to server: {ex.Message}");
-        }
+      _message.TrackName = _currentTrack?.Name ?? string.Empty;
+      _message.Envelopes = BuildParameters(_linkedParameters);
+
+      try
+      {
+        await _transport.SendMessage(_message, token);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogDebug($"Failed to send envelope values to server: {ex.Message}");
       }
     }
     catch (Exception ex)
@@ -75,9 +83,32 @@ public class ActiveEnvelopeMonitor
     {
       await _transport.StopAsync(token);
     }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Update failed: {msg} - {stack}", ex.Message, ex.StackTrace);
+    }
   }
 
-  private static List<EnvelopeDto> BuildEnvelopes(TrackFxEnvelope[] envelopes)
+  private void UpdateCurrentTrack()
+  {
+    var selectedTrack = Project.Current.GetSelectedTrack();
+    if (selectedTrack?.ReaperHandle == _currentTrack?.ReaperHandle) return;
+
+    _currentTrack = selectedTrack;
+    if (_currentTrack == null)
+    {
+      _linkedParameters = [];
+      return;
+    }
+
+    _linkedParameters = LinkedParameter.Load(_currentTrack);
+    foreach (var linkedParameter in _linkedParameters)
+    {
+      _logger.LogDebug("Loaded linked parameter: {lp}", linkedParameter);
+    }
+  }
+
+  private static List<EnvelopeDto> BuildParameters(LinkedParameter[] envelopes)
   {
     var envelopeData = envelopes
       .Select(env => new EnvelopeData(env))
