@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Hemisphera.Hulp.Plugin.Models;
+using Hemisphera.Hulp.Plugin.Settings;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ReaParamView.Types;
 using ReaSharp.Models;
 
-namespace ReaParamView.Plugin;
+namespace Hemisphera.Hulp.Plugin.Infrastructure;
 
 public class ActiveEnvelopeMonitor
 {

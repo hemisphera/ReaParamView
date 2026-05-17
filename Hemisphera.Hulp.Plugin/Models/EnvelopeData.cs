@@ -1,4 +1,4 @@
-﻿namespace ReaParamView.Plugin;
+﻿namespace Hemisphera.Hulp.Plugin.Models;
 
 public class EnvelopeData
 {

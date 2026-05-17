@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using ReaParamView.Types;
 
-namespace ReaParamView.Plugin;
+namespace Hemisphera.Hulp.Plugin.Infrastructure;
 
 public class NullTransport : ITransport
 {

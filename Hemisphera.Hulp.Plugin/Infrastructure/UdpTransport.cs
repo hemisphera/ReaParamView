@@ -1,8 +1,9 @@
 ﻿using System.Net.Sockets;
+using Hemisphera.Hulp.Plugin.Settings;
 using Microsoft.Extensions.Options;
 using ReaParamView.Types;
 
-namespace ReaParamView.Plugin;
+namespace Hemisphera.Hulp.Plugin.Infrastructure;
 
 public class UdpTransport : ITransport
 {

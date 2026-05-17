@@ -1,7 +1,7 @@
 ﻿using ReaSharp.Models;
 using ReaSharp.RppXml;
 
-namespace ReaParamView.Plugin;
+namespace Hemisphera.Hulp.Plugin.Models;
 
 public class LinkedParameter
 {

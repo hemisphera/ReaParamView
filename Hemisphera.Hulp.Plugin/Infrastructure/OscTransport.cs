@@ -1,10 +1,11 @@
 ﻿using System.Net;
+using Hemisphera.Hulp.Plugin.Settings;
 using Hsp.Osc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ReaParamView.Types;
 
-namespace ReaParamView.Plugin;
+namespace Hemisphera.Hulp.Plugin.Infrastructure;
 
 public class OscTransport : ITransport
 {
@@ -38,6 +39,11 @@ public class OscTransport : ITransport
     _logger.LogInformation("Disconnected");
   }
 
+  public async Task Send(IMessage message, CancellationToken token = default)
+  {
+    await message.Send(_client);
+  }
+
   public async Task SendMessage(MessageDto message, CancellationToken token)
   {
     MessageBundle? bundle = null;
@@ -57,9 +63,9 @@ public class OscTransport : ITransport
 
       bundle ??= [];
 
-      bundle.Add(new Message($"/hulp/curr/fx/{i + 1}/name").PushAtom(newEnvelope?.Name ?? string.Empty));
-      bundle.Add(new Message($"/hulp/curr/fx/{i + 1}/value/str").PushAtom(newEnvelope?.FormattedValue ?? string.Empty));
-      bundle.Add(new Message($"/hulp/curr/fx/{i + 1}/value").PushAtom(newEnvelope?.Value ?? 0.0));
+      bundle.Add(new Message($"/hulp/curr/fx/{i}/name").PushAtom(newEnvelope?.Name ?? string.Empty));
+      bundle.Add(new Message($"/hulp/curr/fx/{i}/value/str").PushAtom(newEnvelope?.FormattedValue ?? string.Empty));
+      bundle.Add(new Message($"/hulp/curr/fx/{i}/value").PushAtom(newEnvelope?.Value ?? 0.0));
     }
 
     if (bundle != null)

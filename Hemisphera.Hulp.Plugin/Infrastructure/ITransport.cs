@@ -1,6 +1,6 @@
 ﻿using ReaParamView.Types;
 
-namespace ReaParamView.Plugin;
+namespace Hemisphera.Hulp.Plugin.Infrastructure;
 
 public interface ITransport
 {
