@@ -190,7 +190,7 @@ public sealed class TrackArea : IDisposable
     transport.CursorPosition = toArea.Item.Start;
     Reaper.Main_OnCommandEx.Invoke(42398, 0, transport.Project.ReaperHandle); // Paste items
 
-    var newItem = transport.Project.GetSelectedItems(1).FirstOrDefault();
+    var newItem = transport.Project.GetSelectedMediaItems(1).FirstOrDefault();
     if (newItem == null) return null;
 
     newItem.Length = toArea.Item.End - toArea.Item.Start;

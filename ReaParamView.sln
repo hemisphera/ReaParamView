@@ -1,10 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaParamView.Plugin", "ReaParamView.Plugin\ReaParamView.Plugin.csproj", "{A0A0818A-C5DC-4817-B549-F122024ACF90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hemisphera.Hulp.Plugin", "Hemisphera.Hulp.Plugin\Hemisphera.Hulp.Plugin.csproj", "{A0A0818A-C5DC-4817-B549-F122024ACF90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaParamView.Types", "ReaParamView.Types\ReaParamView.Types.csproj", "{BD4F506C-3DC7-41F3-B605-74D498827D97}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hemisphera.Hulp.Types", "Hemisphera.Hulp.Types\Hemisphera.Hulp.Types.csproj", "{BD4F506C-3DC7-41F3-B605-74D498827D97}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaParamView.WebApp", "ReaParamView.WebApp\ReaParamView.WebApp.csproj", "{DBBCC313-FAF5-4B99-94C9-E0E904D87855}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hemisphera.Hulp.WebApp", "Hemisphera.Hulp.WebApp\Hemisphera.Hulp.WebApp.csproj", "{DBBCC313-FAF5-4B99-94C9-E0E904D87855}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReaSharp", "..\ReaSharp\ReaSharp\ReaSharp.csproj", "{688DA32D-30E4-45B2-8831-FB54BA29A932}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +26,9 @@ Global
 		{DBBCC313-FAF5-4B99-94C9-E0E904D87855}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBBCC313-FAF5-4B99-94C9-E0E904D87855}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBBCC313-FAF5-4B99-94C9-E0E904D87855}.Release|Any CPU.Build.0 = Release|Any CPU
+		{688DA32D-30E4-45B2-8831-FB54BA29A932}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{688DA32D-30E4-45B2-8831-FB54BA29A932}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{688DA32D-30E4-45B2-8831-FB54BA29A932}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{688DA32D-30E4-45B2-8831-FB54BA29A932}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

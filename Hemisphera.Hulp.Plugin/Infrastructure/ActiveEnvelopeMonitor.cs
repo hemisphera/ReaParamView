@@ -66,7 +66,7 @@ public class ActiveEnvelopeMonitor
           }
           catch (Exception ex)
           {
-            _logger.LogDebug($"Failed to send envelope values to server: {ex.Message}");
+            _logger.LogDebug("Failed to send envelope values to server: {message}", ex.Message);
           }
         }
       }
@@ -96,9 +96,9 @@ public class ActiveEnvelopeMonitor
     }
   }
 
-  private static List<EnvelopeDto> BuildParameters(LinkedParameter[] envelopes)
+  private static List<EnvelopeDto> BuildParameters(LinkedParameter[] parameters)
   {
-    var envelopeData = envelopes
+    var envelopeData = parameters
       .Select(env => new EnvelopeData(env))
       .ToList();
 

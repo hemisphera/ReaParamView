@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+        <RootNamespace>ReaParamView.WebApp</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -12,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ReaParamView.Types\ReaParamView.Types.csproj" />
+      <ProjectReference Include="..\Hemisphera.Hulp.Types\Hemisphera.Hulp.Types.csproj" />
     </ItemGroup>
 
 </Project>
