@@ -19,7 +19,10 @@
             var isNext = i == 0;
             <div class="ev-item @(isNext ? "ev-item--next" : "")">
                 <div class="ev-item-text">@ev.Text</div>
-                <div class="ev-item-time">@FormatRemaining(remaining)</div>
+                <div class="ev-item-meta">
+                    <div class="ev-item-time">@FormatRemaining(remaining)</div>
+                    <div class="ev-item-countdown">Countdown @FormatCountdown(ev.Countdown)</div>
+                </div>
             </div>
         }
     }
@@ -37,7 +40,10 @@
         _timer.Start();
     }
 
-    private void Refresh() => InvokeAsync(StateHasChanged);
+    private void Refresh()
+    {
+        InvokeAsync(StateHasChanged);
+    }
 
     private static string FormatRemaining(double seconds)
     {
@@ -48,10 +54,19 @@
             : $"T-{ts:m\\:ss}";
     }
 
+    private static string FormatCountdown(double seconds)
+    {
+        var ts = TimeSpan.FromSeconds(Math.Max(0, seconds));
+        return ts.TotalHours >= 1
+            ? ts.ToString(@"h\:mm\:ss")
+            : ts.ToString(@"m\:ss");
+    }
+
     public void Dispose()
     {
         OscService.UpcomingEventsChanged -= Refresh;
         OscService.TransportChanged -= Refresh;
         _timer.Dispose();
     }
+
 }

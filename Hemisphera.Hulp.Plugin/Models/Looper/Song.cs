@@ -144,6 +144,34 @@ public sealed class Song : IDisposable
       bundle.Add(msg);
     }
 
+    var events = CollectEvents()
+      .Concat(Enumerable.Repeat(default(HulpEvent), 24))
+      .Take(24);
+    bundle.AddRange(events.Select((ev, idx) => new Message($"/hulp/event/{idx + 1}")
+      .PushAtom(ev?.Text ?? string.Empty)
+      .PushAtom(ev?.Time ?? 0.0)));
+
     await osc.Send(new MessageBundle(bundle.ToArray()));
+  }
+
+  private IEnumerable<HulpEvent> CollectEvents()
+  {
+    foreach (var area in RecordingAreas)
+    {
+      yield return new HulpEvent
+      {
+        Text = $"Record: {area.Name} {area.Item.Track.Name}",
+        Time = area.Item.Start.TotalSeconds
+      };
+    }
+
+    foreach (var sel in Selectors)
+    {
+      yield return new HulpEvent
+      {
+        Text = $"Select: {sel.Track.Name}",
+        Time = sel.Start.TotalSeconds
+      };
+    }
   }
 }

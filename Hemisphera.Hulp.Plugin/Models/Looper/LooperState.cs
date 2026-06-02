@@ -103,13 +103,12 @@ public class LooperState
       }
 
       CurrentSong = songs.FirstOrDefault(s => now.IsWithin(s.Region));
+      CurrentSong?.Initialize(now);
       if (CurrentSong != null)
       {
+        CurrentSong.Dump(_logger);
         await CurrentSong.SendMetadata(_osc);
       }
-
-      CurrentSong?.Initialize(now);
-      CurrentSong?.Dump(_logger);
       _timer = Stopwatch.StartNew();
     }
     finally
