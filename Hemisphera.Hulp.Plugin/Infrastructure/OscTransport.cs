@@ -4,43 +4,63 @@ using Hsp.Osc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ReaParamView.Types;
+using ReaSharp;
 
 namespace Hemisphera.Hulp.Plugin.Infrastructure;
 
 public class OscTransport : ITransport
 {
   private readonly ILogger<OscTransport> _logger;
-  private readonly OscUdpClient _client;
+  private OscUdpClient? _client;
   private readonly MessageDto _lastMessage = new();
 
 
-  public OscTransport(IOptions<MonitorSettings> settings, ILogger<OscTransport> logger)
+  public OscTransport(ILogger<OscTransport> logger)
   {
     _logger = logger;
-    _client = new OscUdpClient(
-      IPAddress.Parse(settings.Value.Host),
-      settings.Value.Port
-    );
-    _logger.LogInformation("Created OSC transport to {ip}:{post}", _client.Address, _client.Port);
   }
 
 
   public async Task StartAsync(CancellationToken ct)
   {
+    await StopAsync(ct);
+    
     _logger.LogInformation("Connecting ...");
+    _client = CreateClient();
+    if (_client == null) return;
     await _client.ConnectAsync();
     _logger.LogInformation("Connected");
+  }
+
+  private OscUdpClient? CreateClient()
+  {
+    var ini = ReaperGlobal.ReadSettings();
+    if (ini == null) return null;
+
+    var oscDevice = ReaperGlobal.EnumerateOscDevices()
+      .FirstOrDefault(dev => dev.Name.Equals("Hulp", StringComparison.OrdinalIgnoreCase));
+    if (oscDevice == null)
+    {
+      _logger.LogWarning("No OSC device 'Hulp' found");
+      return null;
+    }
+    
+    var client = new OscUdpClient(IPAddress.Parse(oscDevice.DeviceIp), oscDevice.DevicePort);  
+    _logger.LogInformation("Created OSC transport to {ip}:{post}", client.Address, client.Port);
+    return client;
   }
 
   public async Task StopAsync(CancellationToken ct)
   {
     _logger.LogInformation("Disconnecting ...");
-    await _client.DisconnectAsync();
+    if (_client != null)
+      await _client.DisconnectAsync();
     _logger.LogInformation("Disconnected");
   }
 
   public async Task Send(IMessage message, CancellationToken token = default)
   {
+    if (_client == null) return;
     await message.Send(_client);
   }
 
@@ -70,7 +90,7 @@ public class OscTransport : ITransport
 
     if (bundle != null)
     {
-      await bundle.Send(_client);
+      await Send(bundle, token);
     }
 
     _lastMessage.TrackName = message.TrackName;
