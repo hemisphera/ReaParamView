@@ -2,7 +2,6 @@
 using System.Threading.Channels;
 using Hsp.Osc;
 using Microsoft.Extensions.Logging;
-using ReaParamView.Types;
 using ReaSharp;
 
 namespace Hemisphera.Hulp.Plugin.Infrastructure;

@@ -12,9 +12,8 @@ public class ParameterSetDto
     for (var i = 0; i < Envelopes.Length; i++)
     {
       Envelopes[i].Name = other.Envelopes[i].Name;
-      Envelopes[i].Value = other.Envelopes[i].Value;
-      Envelopes[i].FormattedValue = other.Envelopes[i].FormattedValue;
       Envelopes[i].Percentage = other.Envelopes[i].Percentage;
+      Envelopes[i].FormattedValue = other.Envelopes[i].FormattedValue;
     }
   }
 }

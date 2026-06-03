@@ -58,9 +58,8 @@ public class ParameterMonitor
         {
           _monitoredParameters[i]?.UpdateValue();
           _state.Envelopes[i].Name = _monitoredParameters[i]?.Name ?? string.Empty;
-          _state.Envelopes[i].Value = _monitoredParameters[i]?.Value ?? 0.0;
-          _state.Envelopes[i].FormattedValue = _monitoredParameters[i]?.FormattedValue ?? string.Empty;
           _state.Envelopes[i].Percentage = _monitoredParameters[i]?.Percentage ?? 0.0;
+          _state.Envelopes[i].FormattedValue = _monitoredParameters[i]?.FormattedValue ?? string.Empty;
         }
 
         try
@@ -101,7 +100,7 @@ public class ParameterMonitor
       bundle.Add(new Message($"/hulp/curr/fx/{i + 1}/name")
         .PushAtom(newEnvelope.Name ?? string.Empty));
       bundle.Add(new Message($"/hulp/curr/fx/{i + 1}/value")
-        .PushAtom(newEnvelope.Value)
+        .PushAtom(newEnvelope.Percentage)
         .PushAtom(newEnvelope.FormattedValue));
     }
 
@@ -143,7 +142,7 @@ public class ParameterMonitor
 
   private static bool HasChanged(ParameterDto? lastEnvelope, ParameterDto? newEnvelope)
   {
-    if (Math.Abs((lastEnvelope?.Value ?? 0.0) - (newEnvelope?.Value ?? 0.0)) > 0.01)
+    if (Math.Abs((lastEnvelope?.Percentage ?? 0.0) - (newEnvelope?.Percentage ?? 0.0)) > 0.01)
       return true;
     if (!(lastEnvelope?.Name ?? string.Empty).Equals(newEnvelope?.Name ?? string.Empty, StringComparison.OrdinalIgnoreCase))
       return true;

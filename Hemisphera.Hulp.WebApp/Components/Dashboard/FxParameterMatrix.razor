@@ -23,11 +23,11 @@
         {
             if (bySlot.TryGetValue(slot, out var param) && !string.IsNullOrEmpty(param.Name))
             {
-                var pct = Math.Clamp(param.Value, 0.0, 1.0) * 100.0;
+                var pct = Math.Clamp(param.Percentage, 0.0, 1.0) * 100.0;
                 <div class="fx-card">
                     <div class="fx-card-name" title="@param.Name">@param.Name</div>
                     <div
-                        class="fx-card-value">@(string.IsNullOrEmpty(param.FormattedValue) ? param.Value.ToString("F4") : param.FormattedValue)</div>
+                        class="fx-card-value">@(string.IsNullOrEmpty(param.FormattedValue) ? param.Percentage.ToString("F4") : param.FormattedValue)</div>
                     <div class="fx-bar-track">
                         <div class="fx-bar-fill"
                              style="width: @pct.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%"></div>
