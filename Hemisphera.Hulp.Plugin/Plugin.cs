@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using ReaSharp;
 
 namespace Hemisphera.Hulp.Plugin;
@@ -30,7 +29,6 @@ public static class Plugin
       .ConfigureServices((context, sc) =>
       {
         sc.Configure<LooperSettings>(context.Configuration.GetSection(nameof(LooperSettings)));
-        sc.Configure<MonitorSettings>(context.Configuration.GetSection(nameof(MonitorSettings)));
         sc.AddSingleton<ICommandRegistry, DefaultCommandRegistry>();
         sc.AddSingleton<ActiveEnvelopeMonitor>();
         sc.AddSingleton<OscTransport>();
@@ -43,14 +41,6 @@ public static class Plugin
     try
     {
       var state = PluginState.Initialize(ReaperPluginInfo.FromPointer(rec), host);
-      var logger = state.Services.GetService<ILogger<ActiveEnvelopeMonitor>>();
-      if (logger != null && logger.IsEnabled(LogLevel.Debug))
-      {
-        var options = state.Services.GetRequiredService<IOptions<MonitorSettings>>().Value;
-        logger.LogDebug("{Key}: {Value}", nameof(options.Host), options.Host);
-        logger.LogDebug("{Key}: {Value}", nameof(options.Port), options.Port);
-        logger.LogDebug("{Key}: {Value}", nameof(options.UpdateIntervalMs), options.UpdateIntervalMs);
-      }
 
       var commands = state.Services.GetRequiredService<ICommandRegistry>();
       commands.Register("HULP_START", "Hulp: Start", Commands.StartLooper);

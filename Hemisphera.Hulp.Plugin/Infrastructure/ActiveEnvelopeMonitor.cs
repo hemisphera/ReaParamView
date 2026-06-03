@@ -1,7 +1,5 @@
 ﻿using Hemisphera.Hulp.Plugin.Models;
-using Hemisphera.Hulp.Plugin.Settings;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using ReaParamView.Types;
 using ReaSharp.Models;
 
@@ -13,7 +11,6 @@ public class ActiveEnvelopeMonitor
 
   private readonly ILogger<ActiveEnvelopeMonitor> _logger;
   private readonly ITransport _transport;
-  private readonly IOptionsMonitor<MonitorSettings> _settings;
 
 
   private Track? _currentTrack;
@@ -22,11 +19,10 @@ public class ActiveEnvelopeMonitor
   private CancellationTokenSource? _cancellationTokenSource;
 
 
-  public ActiveEnvelopeMonitor(ILogger<ActiveEnvelopeMonitor> logger, ITransport transport, IOptionsMonitor<MonitorSettings> settings)
+  public ActiveEnvelopeMonitor(ILogger<ActiveEnvelopeMonitor> logger, ITransport transport)
   {
     _logger = logger;
     _transport = transport;
-    _settings = settings;
   }
 
 
@@ -49,25 +45,21 @@ public class ActiveEnvelopeMonitor
     await _transport.StartAsync(token);
     try
     {
-      var settings = _settings.CurrentValue;
       while (!token.IsCancellationRequested)
       {
+        await Task.Delay(50, token);
+        UpdateCurrentTrack();
+
+        _message.TrackName = _currentTrack?.Name ?? string.Empty;
+        _message.Envelopes = BuildParameters(_linkedParameters);
+
+        try
         {
-          await Task.Delay(settings.UpdateIntervalMs, token);
-
-          UpdateCurrentTrack();
-
-          _message.TrackName = _currentTrack?.Name ?? string.Empty;
-          _message.Envelopes = BuildParameters(_linkedParameters);
-
-          try
-          {
-            await _transport.SendMessage(_message, token);
-          }
-          catch (Exception ex)
-          {
-            _logger.LogDebug("Failed to send envelope values to server: {message}", ex.Message);
-          }
+          await _transport.SendMessage(_message, token);
+        }
+        catch (Exception ex)
+        {
+          _logger.LogDebug("Failed to send envelope values to server: {message}", ex.Message);
         }
       }
     }
