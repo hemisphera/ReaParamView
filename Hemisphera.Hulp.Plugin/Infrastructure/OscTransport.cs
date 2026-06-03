@@ -82,10 +82,11 @@ public class OscTransport : ITransport
       if (!fullRefresh && !HasChanged(lastEnvelope, newEnvelope)) continue;
 
       bundle ??= [];
-
-      bundle.Add(new Message($"/hulp/curr/fx/{i}/name").PushAtom(newEnvelope?.Name ?? string.Empty));
-      bundle.Add(new Message($"/hulp/curr/fx/{i}/value/str").PushAtom(newEnvelope?.FormattedValue ?? string.Empty));
-      bundle.Add(new Message($"/hulp/curr/fx/{i}/value").PushAtom(newEnvelope?.Value ?? 0.0));
+      bundle.Add(new Message($"/hulp/curr/fx/{i}/name")
+        .PushAtom(newEnvelope?.Name ?? string.Empty));
+      bundle.Add(new Message($"/hulp/curr/fx/{i}/value")
+        .PushAtom(newEnvelope?.Value ?? 0.0)
+        .PushAtom(newEnvelope?.FormattedValue ?? string.Empty));
     }
 
     if (bundle != null)

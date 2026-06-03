@@ -19,6 +19,7 @@ public class OscService : BackgroundService
   public TransportState Transport { get; } = new();
   public event Action? TransportChanged;
   private long _lastPositionNotify;
+  private long _lastVuNotify;
 
   // Tracks (8 fixed slots, indexed 0–7; logical index 1–8)
   private readonly TrackInfo[] _tracks = Enumerable.Range(0, 8).Select(_ => new TrackInfo()).ToArray();
@@ -154,6 +155,24 @@ public class OscService : BackgroundService
       var track = _tracks.FirstOrDefault(t => t.IsActive && t.ReaperIndex == trackNumber - 1);
       if (track == null) return;
       track.IsSelected = ctx.Message.Atoms.FirstOrDefault().Float32Value > 0.5f;
+      TracksChanged?.Invoke();
+    });
+
+    server.RegisterHandler(@"^/track/(\d+)/vu$", (MessageHandlerContext ctx) =>
+    {
+      var trackNumber = int.Parse(ctx.Match.Groups[1].Value);
+      var track = _tracks.FirstOrDefault(t => t.IsActive && t.ReaperIndex == trackNumber - 1);
+      if (track == null) return;
+
+      track.VuLevel = Math.Clamp(ctx.Message.Atoms.FirstOrDefault().Float32Value, 0f, 1f);
+
+      var now = Stopwatch.GetTimestamp();
+      if (Stopwatch.GetElapsedTime(_lastVuNotify, now).TotalMilliseconds < 250)
+      {
+        return;
+      }
+
+      _lastVuNotify = now;
       TracksChanged?.Invoke();
     });
 

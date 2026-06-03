@@ -8,4 +8,5 @@ public class TrackInfo
   public int ReaperIndex { get; set; }
   public bool IsSelected { get; set; }
   public bool IsRecArmed { get; set; }
+  public float VuLevel { get; set; }
 }

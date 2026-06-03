@@ -10,8 +10,11 @@
             <div class="@cssClass">
                 @if (track.IsActive)
                 {
-                    <div class="tv-card-index">@track.LogicalIndex</div>
-                    <div class="tv-card-name" title="@track.Name">@track.Name</div>
+                    <div class="tv-vu-fill" @key="GetVuRenderKey(track)" style="@BuildVuStyle(track)"></div>
+                    <div class="tv-card-header">
+                        <div class="tv-card-index">@track.LogicalIndex</div>
+                        <div class="tv-card-name" title="@track.Name">@track.Name</div>
+                    </div>
                 }
             </div>
         }
@@ -37,6 +40,18 @@
         if (track.IsRecArmed) classes += " tv-card--armed";
         if (track.IsSelected) classes += " tv-card--selected";
         return classes;
+    }
+
+    private static string BuildVuStyle(TrackInfo track)
+    {
+        var level = Math.Clamp(track.VuLevel, 0f, 1f);
+        var levelText = level.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        return $"position:absolute; inset:20%; transform-origin:bottom center; transform:scaleY({levelText}); background:rgba(34, 197, 94, 0.25); transition:transform 0.18s linear; pointer-events:none;";
+    }
+
+    private static string GetVuRenderKey(TrackInfo track)
+    {
+        return $"{track.LogicalIndex}:{track.VuLevel:F3}";
     }
 
     public void Dispose()
