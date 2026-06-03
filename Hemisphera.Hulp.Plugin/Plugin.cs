@@ -1,7 +1,9 @@
 ﻿using System.Runtime.InteropServices;
+using System.Threading.Channels;
 using Hemisphera.Hulp.Plugin.Infrastructure;
 using Hemisphera.Hulp.Plugin.Models.Looper;
 using Hemisphera.Hulp.Plugin.Settings;
+using Hsp.Osc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,9 +30,17 @@ public static class Plugin
       })
       .ConfigureServices((context, sc) =>
       {
+        sc.AddSingleton<Channel<IMessage>>(_ =>
+          Channel.CreateBounded<IMessage>(new BoundedChannelOptions(1000)
+          {
+            SingleWriter = true,
+            FullMode = BoundedChannelFullMode.Wait
+          }));
+        sc.AddSingleton<ChannelWriter<IMessage>>(sp => sp.GetRequiredService<Channel<IMessage>>().Writer);
+        sc.AddSingleton<ChannelReader<IMessage>>(sp => sp.GetRequiredService<Channel<IMessage>>().Reader);
         sc.Configure<LooperSettings>(context.Configuration.GetSection(nameof(LooperSettings)));
         sc.AddSingleton<ICommandRegistry, DefaultCommandRegistry>();
-        sc.AddSingleton<ActiveEnvelopeMonitor>();
+        sc.AddSingleton<ParameterMonitor>();
         sc.AddSingleton<OscTransport>();
         sc.AddSingleton<LooperState>();
         sc.AddSingleton<ITransport, OscTransport>(services => services.GetRequiredService<OscTransport>());
@@ -48,8 +58,10 @@ public static class Plugin
       commands.Register("HULP_DEBUG", "Hulp: Print Debug Info", Commands.DumpDebug);
       commands.Register("HULP_FOCUS", "Hulp: Focus song", Commands.FocusCurrentSong);
 
-      var monitor = state.Services.GetRequiredService<ActiveEnvelopeMonitor>();
+      var monitor = state.Services.GetRequiredService<ParameterMonitor>();
       _ = monitor.Start();
+      var transport = state.Services.GetRequiredService<ITransport>();
+      _ = transport.StartAsync(CancellationToken.None);
 
       return 1;
     }

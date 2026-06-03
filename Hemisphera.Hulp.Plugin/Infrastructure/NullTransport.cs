@@ -22,12 +22,12 @@ public class NullTransport : ITransport
     return Task.CompletedTask;
   }
 
-  public async Task SendMessage(MessageDto message, CancellationToken token)
+  public async Task SendMessage(ParameterSetDto parameterSet, CancellationToken token)
   {
     _logger.LogInformation("Tick");
-    _logger.LogInformation("Track: {track}", message.TrackName);
+    _logger.LogInformation("Track: {track}", parameterSet.TrackName);
     _logger.LogInformation("Envelopes");
-    foreach (var envelope in message.Envelopes)
+    foreach (var envelope in parameterSet.Envelopes)
     {
       _logger.LogInformation("Env: {name}: {value}", envelope.Name, envelope.FormattedValue);
     }

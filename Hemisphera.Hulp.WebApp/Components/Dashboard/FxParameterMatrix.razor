@@ -1,4 +1,5 @@
 @inject OscService OscService
+@using ReaParamView.Types
 @implements IDisposable
 
 <div class="fx-wrapper">
@@ -12,7 +13,11 @@
     }
     <div class="fx-grid">
         @{
-            var bySlot = OscService.FxParameters.Envelopes.ToDictionary(e => e.Slot);
+            var bySlot = new Dictionary<int, ParameterDto>();
+            for (var i = 0; i < OscService.FxParameters.Envelopes.Length; i++)
+            {
+                bySlot.Add(i, OscService.FxParameters.Envelopes[i]);
+            }
         }
         @for (var slot = 1; slot <= 8; slot++)
         {
@@ -21,7 +26,8 @@
                 var pct = Math.Clamp(param.Value, 0.0, 1.0) * 100.0;
                 <div class="fx-card">
                     <div class="fx-card-name" title="@param.Name">@param.Name</div>
-                    <div class="fx-card-value">@(string.IsNullOrEmpty(param.FormattedValue) ? param.Value.ToString("F4") : param.FormattedValue)</div>
+                    <div
+                        class="fx-card-value">@(string.IsNullOrEmpty(param.FormattedValue) ? param.Value.ToString("F4") : param.FormattedValue)</div>
                     <div class="fx-bar-track">
                         <div class="fx-bar-fill"
                              style="width: @pct.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%"></div>
@@ -55,4 +61,5 @@
     {
         OscService.FxParametersChanged -= Refresh;
     }
+
 }

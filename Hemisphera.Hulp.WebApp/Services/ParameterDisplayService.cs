@@ -4,15 +4,15 @@ namespace ReaParamView.WebApp.Services;
 
 public class ParameterDisplayService
 {
-  private MessageDto? _currentMessage;
+  private ParameterSetDto? _currentMessage;
 
   public event Action? OnChange;
 
-  public MessageDto? CurrentMessage => _currentMessage;
+  public ParameterSetDto? CurrentMessage => _currentMessage;
 
-  public void UpdateMessage(MessageDto message)
+  public void UpdateMessage(ParameterSetDto parameterSet)
   {
-    _currentMessage = message;
+    _currentMessage = parameterSet;
     OnChange?.Invoke();
   }
 }

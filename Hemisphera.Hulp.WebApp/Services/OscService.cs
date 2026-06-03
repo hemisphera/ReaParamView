@@ -11,8 +11,8 @@ public class OscService : BackgroundService
   private readonly ILogger<OscService> _logger;
 
   // FX Parameters
-  private readonly MessageDto _fxParameters = new();
-  public MessageDto FxParameters => _fxParameters;
+  private readonly ParameterSetDto _fxParameters = new();
+  public ParameterSetDto FxParameters => _fxParameters;
   public event Action? FxParametersChanged;
 
   // Transport
@@ -43,7 +43,6 @@ public class OscService : BackgroundService
   public OscService(ILogger<OscService> logger)
   {
     _logger = logger;
-    _fxParameters.Envelopes = Enumerable.Range(0, 8).Select(i => new EnvelopeDto { Slot = i + 1 }).ToList();
     _events = Enumerable.Range(0, 24).Select(_ => new UpcomingEvent()).ToArray();
   }
 
@@ -60,21 +59,21 @@ public class OscService : BackgroundService
     server.RegisterHandler(@"^/hulp/curr/fx/(\d+)/name$", ctx =>
     {
       var slot = int.Parse(ctx.Match.Groups[1].Value);
-      GetEnvelope(slot).Name = ctx.Message.Atoms.FirstOrDefault().StringValue;
+      _fxParameters.Envelopes[slot].Name = ctx.Message.Atoms.FirstOrDefault().StringValue;
       FxParametersChanged?.Invoke();
     });
 
     server.RegisterHandler(@"^/hulp/curr/fx/(\d+)/value/str$", ctx =>
     {
       var slot = int.Parse(ctx.Match.Groups[1].Value);
-      GetEnvelope(slot).FormattedValue = ctx.Message.Atoms.FirstOrDefault().StringValue ?? string.Empty;
+      _fxParameters.Envelopes[slot].FormattedValue = ctx.Message.Atoms.FirstOrDefault().StringValue ?? string.Empty;
       FxParametersChanged?.Invoke();
     });
 
     server.RegisterHandler(@"^/hulp/curr/fx/(\d+)/value$", ctx =>
     {
       var slot = int.Parse(ctx.Match.Groups[1].Value);
-      GetEnvelope(slot).Value = ctx.Message.Atoms.FirstOrDefault().Float32Value;
+      _fxParameters.Envelopes[slot].Value = ctx.Message.Atoms.FirstOrDefault().Float32Value;
       FxParametersChanged?.Invoke();
     });
 
@@ -101,7 +100,7 @@ public class OscService : BackgroundService
     server.RegisterHandler("^/time$", ctx =>
     {
       Transport.Position = ctx.Message.Atoms.FirstOrDefault().Float32Value;
-      
+
       var now = Stopwatch.GetTimestamp();
       if (Stopwatch.GetElapsedTime(now - _lastPositionNotify).TotalMilliseconds >= 500)
       {
@@ -230,10 +229,5 @@ public class OscService : BackgroundService
 
     if (removed)
       UpcomingEventsChanged?.Invoke();
-  }
-
-  private EnvelopeDto GetEnvelope(int slot)
-  {
-    return _fxParameters.Envelopes.First(e => e.Slot == slot);
   }
 }

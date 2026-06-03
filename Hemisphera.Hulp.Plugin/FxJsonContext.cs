@@ -3,7 +3,7 @@ using ReaParamView.Types;
 
 namespace Hemisphera.Hulp.Plugin;
 
-[JsonSerializable(typeof(MessageDto))]
+[JsonSerializable(typeof(ParameterSetDto))]
 internal partial class FxJsonContext : JsonSerializerContext
 {
 }

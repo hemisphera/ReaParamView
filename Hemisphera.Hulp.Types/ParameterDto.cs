@@ -1,9 +1,8 @@
 ﻿namespace ReaParamView.Types;
 
-public class EnvelopeDto
+public class ParameterDto
 {
   public string? Name { get; set; }
-  public int Slot { get; set; }
   public double Value { get; set; }
   public double Percentage { get; set; }
   public string FormattedValue { get; set; } = string.Empty;
