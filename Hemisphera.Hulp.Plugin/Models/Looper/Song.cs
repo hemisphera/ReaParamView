@@ -126,7 +126,7 @@ public sealed class Song : IDisposable
     }
   }
 
-  public async Task SendMetadata(OscTransport osc)
+  public IMessage GetOscMessage()
   {
     var bundle = new List<Message>
     {
@@ -151,7 +151,7 @@ public sealed class Song : IDisposable
       .PushAtom(ev?.Text ?? string.Empty)
       .PushAtom(ev?.Time ?? 0.0)));
 
-    await osc.Send(new MessageBundle(bundle.ToArray()));
+    return new MessageBundle(bundle.ToArray());
   }
 
   private IEnumerable<HulpEvent> CollectEvents()

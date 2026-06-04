@@ -4,6 +4,7 @@ using ReaParamView.Types;
 namespace Hemisphera.Hulp.Plugin;
 
 [JsonSerializable(typeof(ParameterSetDto))]
-internal partial class FxJsonContext : JsonSerializerContext
+[JsonSerializable(typeof(ParameterDto))]
+internal partial class HulpJsonContext : JsonSerializerContext
 {
 }
