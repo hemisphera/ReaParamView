@@ -25,6 +25,7 @@ public class MonitoredParameter
     Index = index;
 
     var parameter = GetFxParameter();
+
     Name = (parameter.Name ?? string.Empty).Split('/').First().Trim();
     MinValue = parameter.Minimum;
     MaxValue = parameter.Maximum;
@@ -35,10 +36,11 @@ public class MonitoredParameter
   public void UpdateValue()
   {
     var parameter = GetFxParameter();
-    var parameterValue = parameter.GetValue();
+    var parameterValue = parameter.GetValueNormalized();
     Value = parameterValue;
     FormattedValue = parameter.GetFormattedValue();
-    Percentage = (parameterValue - MinValue) / (MaxValue - MinValue);
+    //Percentage = (parameterValue - MinValue) / (MaxValue - MinValue);
+    Percentage = Value;
   }
 
   public FxInstanceParameter GetFxParameter()

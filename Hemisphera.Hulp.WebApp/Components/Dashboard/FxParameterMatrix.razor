@@ -19,19 +19,16 @@
                 bySlot.Add(i, OscService.FxParameters.Envelopes[i]);
             }
         }
-        @for (var slot = 1; slot <= 8; slot++)
+        @for (var slot = 0; slot < 8; slot++)
         {
             if (bySlot.TryGetValue(slot, out var param) && !string.IsNullOrEmpty(param.Name))
             {
                 var pct = Math.Clamp(param.Percentage, 0.0, 1.0) * 100.0;
                 <div class="fx-card">
+                    <div class="fx-card-fill"
+                         style="width: @pct.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%"></div>
                     <div class="fx-card-name" title="@param.Name">@param.Name</div>
-                    <div
-                        class="fx-card-value">@(string.IsNullOrEmpty(param.FormattedValue) ? param.Percentage.ToString("F4") : param.FormattedValue)</div>
-                    <div class="fx-bar-track">
-                        <div class="fx-bar-fill"
-                             style="width: @pct.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%"></div>
-                    </div>
+                    <div class="fx-card-value">@param.FormattedValue</div>
                     <div class="fx-card-pct">@pct.ToString("F0")%</div>
                 </div>
             }

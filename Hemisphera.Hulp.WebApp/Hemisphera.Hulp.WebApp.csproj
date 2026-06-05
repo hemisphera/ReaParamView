@@ -16,4 +16,8 @@
       <ProjectReference Include="..\Hemisphera.Hulp.Types\Hemisphera.Hulp.Types.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Components\Components\Knob.razor" />
+    </ItemGroup>
+
 </Project>

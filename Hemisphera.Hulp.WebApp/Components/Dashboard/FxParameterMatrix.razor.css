@@ -72,8 +72,26 @@
 
 .fx-card-empty::before { display: none; }
 
+.fx-card-fill {
+    position: absolute;
+    inset: 4px;
+    max-width: calc(100% - 8px);
+    background: linear-gradient(90deg, rgba(0, 212, 170, 0.2), rgba(0, 170, 255, 0.2));
+    border-radius: 4px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.fx-card-name,
+.fx-card-value,
+.fx-card-pct {
+    position: relative;
+    z-index: 1;
+}
+
 .fx-card-name {
-    font-size: 0.62rem;
+    font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.07em;
     text-transform: uppercase;
@@ -95,24 +113,8 @@
     text-overflow: ellipsis;
 }
 
-.fx-bar-track {
-    height: 4px;
-    background: rgba(255,255,255,0.07);
-    border-radius: 999px;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.fx-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #00d4aa, #00aaff);
-    border-radius: 999px;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    min-width: 2px;
-}
-
 .fx-card-pct {
     font-size: 0.65rem;
-    color: #64748b;
+    color: #ffffff;
     font-variant-numeric: tabular-nums;
 }

@@ -1,11 +1,9 @@
 using System.Diagnostics;
 using System.Threading.Channels;
-using Hemisphera.Hulp.Plugin.Infrastructure;
 using Hemisphera.Hulp.Plugin.Settings;
 using Hsp.Osc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using ReaParamView.Types;
 using ReaSharp;
 using ReaSharp.Models;
 
@@ -103,8 +101,8 @@ public class LooperState
         song.SetActive(now.IsWithin(song.Region));
       }
 
-      var setlist = await SetlistDto.Load(songs);
-      await _writer.WriteAsync(setlist.GetOscMessage());
+      //var setlist = await SetlistDto.Load(songs);
+      //await _writer.WriteAsync(setlist.GetOscMessage());
 
       CurrentSong = songs.FirstOrDefault(s => now.IsWithin(s.Region));
       CurrentSong?.Initialize(now);

@@ -59,21 +59,15 @@ public class OscService : BackgroundService
     server.RegisterHandler(@"^/hulp/curr/fx/(\d+)/name$", ctx =>
     {
       var slot = int.Parse(ctx.Match.Groups[1].Value);
-      _fxParameters.Envelopes[slot].Name = ctx.Message.Atoms.FirstOrDefault().StringValue;
-      FxParametersChanged?.Invoke();
-    });
-
-    server.RegisterHandler(@"^/hulp/curr/fx/(\d+)/value/str$", ctx =>
-    {
-      var slot = int.Parse(ctx.Match.Groups[1].Value);
-      _fxParameters.Envelopes[slot].FormattedValue = ctx.Message.Atoms.FirstOrDefault().StringValue ?? string.Empty;
+      _fxParameters.Envelopes[slot - 1].Name = ctx.Message.Atoms.FirstOrDefault().StringValue;
       FxParametersChanged?.Invoke();
     });
 
     server.RegisterHandler(@"^/hulp/curr/fx/(\d+)/value$", ctx =>
     {
       var slot = int.Parse(ctx.Match.Groups[1].Value);
-      _fxParameters.Envelopes[slot].Percentage = ctx.Message.Atoms.FirstOrDefault().Float32Value;
+      _fxParameters.Envelopes[slot - 1].Percentage = ctx.Message.Atoms.FirstOrDefault().Double64Value;
+      _fxParameters.Envelopes[slot - 1].FormattedValue = ctx.Message.Atoms.LastOrDefault().StringValue ?? string.Empty;
       FxParametersChanged?.Invoke();
     });
 
