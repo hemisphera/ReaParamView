@@ -1,4 +1,4 @@
-﻿namespace ReaParamView.WebApp.Models;
+namespace Hemisphera.Hulp.WebApp.Models;
 
 public class FxParameter
 {

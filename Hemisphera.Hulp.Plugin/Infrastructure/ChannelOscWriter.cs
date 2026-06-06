@@ -1,4 +1,4 @@
-﻿using System.Threading.Channels;
+using System.Threading.Channels;
 using Hsp.Osc;
 
 namespace Hemisphera.Hulp.Plugin.Infrastructure;

@@ -1,4 +1,4 @@
-﻿using Hsp.Osc;
+using Hsp.Osc;
 
 namespace Hemisphera.Hulp.Plugin.Infrastructure;
 

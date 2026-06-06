@@ -1,4 +1,4 @@
-﻿namespace ReaParamView.WebApp.Services;
+namespace Hemisphera.Hulp.WebApp.Models;
 
 public class TrackInfo
 {

@@ -1,4 +1,4 @@
-﻿using Hsp.Osc;
+using Hsp.Osc;
 using Microsoft.Extensions.Logging;
 using ReaSharp;
 using ReaSharp.Models;

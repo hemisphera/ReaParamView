@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http.Features;
-using ReaParamView.WebApp.Components;
-using ReaParamView.WebApp.Services;
+using Hemisphera.Hulp.WebApp.Components;
+using Hemisphera.Hulp.WebApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,4 +1,4 @@
-﻿using Hemisphera.Hulp.Plugin.Infrastructure;
+using Hemisphera.Hulp.Plugin.Infrastructure;
 
 namespace Hemisphera.Hulp.Plugin.StateModels;
 

@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Net;
 using Hsp.Osc;
-using ReaParamView.Types;
-using ReaParamView.WebApp.Models;
+using Hemisphera.Hulp.Shared;
+using Hemisphera.Hulp.WebApp.Models;
 
-namespace ReaParamView.WebApp.Services;
+namespace Hemisphera.Hulp.WebApp.Services;
 
 public class OscService : BackgroundService
 {

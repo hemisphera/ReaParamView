@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Hemisphera.Hulp.Plugin.Models;
 using Hemisphera.Hulp.Plugin.StateModels;
 using Hsp.Osc;
 using Microsoft.Extensions.Logging;
-using ReaParamView.Types;
+using Hemisphera.Hulp.Shared;
 using ReaSharp;
 using ReaSharp.Models;
 

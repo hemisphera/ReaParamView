@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Threading.Channels;
 using Hsp.Osc;
 using Microsoft.Extensions.Logging;

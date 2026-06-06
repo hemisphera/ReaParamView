@@ -1,4 +1,4 @@
-﻿using Hemisphera.Hulp.Plugin.Infrastructure;
+using Hemisphera.Hulp.Plugin.Infrastructure;
 using Hemisphera.Hulp.Plugin.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

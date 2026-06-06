@@ -1,4 +1,4 @@
-﻿namespace ReaParamView.Types;
+namespace Hemisphera.Hulp.Shared;
 
 public class Constants
 {

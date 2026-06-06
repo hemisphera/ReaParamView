@@ -1,4 +1,4 @@
-﻿using ReaSharp.Models;
+using ReaSharp.Models;
 using ReaSharp.RppXml;
 
 namespace Hemisphera.Hulp.Plugin.Models;

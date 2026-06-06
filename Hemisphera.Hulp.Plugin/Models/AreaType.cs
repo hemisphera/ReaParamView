@@ -1,4 +1,4 @@
-﻿namespace Hemisphera.Hulp.Plugin.Models;
+namespace Hemisphera.Hulp.Plugin.Models;
 
 public enum AreaType
 {
