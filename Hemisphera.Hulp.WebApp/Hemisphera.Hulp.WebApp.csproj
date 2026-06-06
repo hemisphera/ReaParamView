@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
+        <AssemblyName>Hemisphera.Hulp.WebApp</AssemblyName>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
@@ -14,10 +15,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Hemisphera.Hulp.Shared\Hemisphera.Hulp.Shared.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="Components\Components\Knob.razor" />
     </ItemGroup>
 
 </Project>

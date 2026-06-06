@@ -16,8 +16,7 @@
 
     <ItemGroup>
         <PackageReference Include="Hsp.Osc" Version="0.0.28" />
-        <PackageReference Include="Hsp.ReaSharp" Version="0.0.12" />
-        <ProjectReference Include="..\..\ReaSharp\ReaSharp\ReaSharp.csproj"/>
+        <PackageReference Include="Hsp.ReaSharp" Version="0.0.15" />
         <ProjectReference Include="..\Hemisphera.Hulp.Shared\Hemisphera.Hulp.Shared.csproj" />
     </ItemGroup>
 
