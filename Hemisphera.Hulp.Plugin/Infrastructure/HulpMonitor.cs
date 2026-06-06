@@ -82,7 +82,7 @@ public class HulpMonitor
     if (e.PropertyName is nameof(state.Solo) or "")
       _osc.WriteAsync(state.Solo.ToOscMessage(baseAddress + "/solo"));
     if (e.PropertyName is nameof(state.RecordArm) or "")
-      _osc.WriteAsync(state.Solo.ToOscMessage(baseAddress + "/recarm"));
+      _osc.WriteAsync(state.RecordArm.ToOscMessage(baseAddress + "/recarm"));
   }
 
 

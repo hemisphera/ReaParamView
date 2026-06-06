@@ -15,10 +15,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Hsp.Osc" Version="0.0.27" />
-        <PackageReference Include="Hsp.ReaSharp" Version="0.0.3"/>
+        <PackageReference Include="Hsp.Osc" Version="0.0.28" />
+        <PackageReference Include="Hsp.ReaSharp" Version="0.0.12" />
         <ProjectReference Include="..\..\ReaSharp\ReaSharp\ReaSharp.csproj"/>
-        <ProjectReference Include="..\Hemisphera.Hulp.Types\Hemisphera.Hulp.Types.csproj" />
+        <ProjectReference Include="..\Hemisphera.Hulp.Shared\Hemisphera.Hulp.Shared.csproj" />
     </ItemGroup>
 
 </Project>

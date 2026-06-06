@@ -5,15 +5,15 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
-        <RootNamespace>ReaParamView.WebApp</RootNamespace>
+        <RootNamespace>Hemisphera.Hulp.WebApp</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Hsp.Osc" Version="0.0.27" />
+        <PackageReference Include="Hsp.Osc" Version="0.0.28" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Hemisphera.Hulp.Types\Hemisphera.Hulp.Types.csproj" />
+      <ProjectReference Include="..\Hemisphera.Hulp.Shared\Hemisphera.Hulp.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>
