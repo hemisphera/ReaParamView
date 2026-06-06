@@ -1,0 +1,54 @@
+@inject OscService OscService
+@using Hemisphera.Hulp.WebApp.Models
+@implements IDisposable
+
+<div class="tv-wrapper">
+    <div class="fx-section-label">Tracks</div>
+    <div class="tv-grid">
+        @foreach (var track in OscService.Tracks)
+        {
+            var cssClass = BuildCardClass(track);
+            <div class="@cssClass">
+                <div class="tv-card-header">
+                    <div class="tv-card-index">@track.Index</div>
+                    <div class="tv-card-name" title="@track.Name">@track.Name</div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        OscService.TracksChanged += Refresh;
+    }
+
+    private void Refresh()
+    {
+        try
+        {
+            InvokeAsync(StateHasChanged);
+        }
+        catch (InvalidOperationException)
+        {
+            /* component not yet attached to renderer */
+        }
+    }
+
+    private static string BuildCardClass(TrackInfo track)
+    {
+        if (string.IsNullOrWhiteSpace(track.Name) || track.Mute) return "tv-card tv-card--muted";
+        if (track.Solo) return "tv-card tv-card--soloed";
+        if (track.RecArm) return "tv-card tv-card--armed";
+        if (track.Selected) return "tv-card tv-card--selected";
+        return "tv-card";
+    }
+
+    public void Dispose()
+    {
+        OscService.TracksChanged -= Refresh;
+    }
+
+}

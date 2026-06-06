@@ -1,0 +1,72 @@
+@inject OscService OscService
+@implements IDisposable
+
+<div class="ev-wrapper">
+    <div class="fx-section-label">Upcoming</div>
+    @{
+        var events = OscService.GetUpcomingEvents();
+    }
+    @if (events.Count == 0)
+    {
+        <div class="ev-empty">No upcoming events</div>
+    }
+    else
+    {
+        @for (var i = 0; i < events.Count; i++)
+        {
+            var ev = events[i];
+            var remaining = ev.Time - OscService.Transport.Position;
+            var isNext = i == 0;
+            <div class="ev-item @(isNext ? "ev-item--next" : "")">
+                <div class="ev-item-text">@ev.Text</div>
+                <div class="ev-item-meta">
+                    <div class="ev-item-time">@FormatRemaining(remaining)</div>
+                    <div class="ev-item-countdown">Countdown @FormatCountdown(ev.Countdown)</div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private System.Timers.Timer _timer = null!;
+
+    protected override void OnInitialized()
+    {
+        OscService.UpcomingEventsChanged += Refresh;
+        OscService.TransportChanged += Refresh;
+        _timer = new System.Timers.Timer(1000) { AutoReset = true };
+        _timer.Elapsed += (_, _) => InvokeAsync(StateHasChanged);
+        _timer.Start();
+    }
+
+    private void Refresh()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private static string FormatRemaining(double seconds)
+    {
+        if (seconds <= 0) return "now";
+        var ts = TimeSpan.FromSeconds(seconds);
+        return ts.TotalHours >= 1
+            ? $"T-{ts:h\\:mm\\:ss}"
+            : $"T-{ts:m\\:ss}";
+    }
+
+    private static string FormatCountdown(double seconds)
+    {
+        var ts = TimeSpan.FromSeconds(Math.Max(0, seconds));
+        return ts.TotalHours >= 1
+            ? ts.ToString(@"h\:mm\:ss")
+            : ts.ToString(@"m\:ss");
+    }
+
+    public void Dispose()
+    {
+        OscService.UpcomingEventsChanged -= Refresh;
+        OscService.TransportChanged -= Refresh;
+        _timer.Dispose();
+    }
+
+}

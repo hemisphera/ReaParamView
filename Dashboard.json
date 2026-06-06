@@ -1,0 +1,321 @@
+{
+  "createdWith": "Open Stage Control",
+  "version": "1.30.2",
+  "type": "session",
+  "content": {
+    "type": "root",
+    "lock": false,
+    "id": "root",
+    "visible": true,
+    "interaction": false,
+    "comments": "",
+    "layout": "default",
+    "justify": "start",
+    "gridTemplate": "",
+    "contain": true,
+    "scroll": true,
+    "innerPadding": true,
+    "tabsPosition": "top",
+    "hideMenu": false,
+    "variables": "@{parent.variables}",
+    "traversing": false,
+    "value": "",
+    "default": "",
+    "linkId": "",
+    "address": "auto",
+    "preArgs": "",
+    "typeTags": "",
+    "decimals": 2,
+    "target": "",
+    "ignoreDefaults": false,
+    "bypass": false,
+    "onCreate": "",
+    "onValue": "",
+    "onTouch": "",
+    "onPreload": "",
+    "widgets": [
+      {
+        "type": "text",
+        "top": 10,
+        "left": 10,
+        "id": "trackname",
+        "width": 350,
+        "height": 30,
+        "expand": false,
+        "address": "/hulp/curr/name"
+      },
+      
+      {
+        "type": "knob",
+        "top": 50,
+        "left": 10,
+        "lock": false,
+        "id": "knob_1",
+        "width": 80,
+        "height": 80,
+        "alphaFillOff": 0.1,
+        "design": "default"
+      },
+      {
+        "type": "text",
+        "top": 130,
+        "left": 10,
+        "id": "fx_name_1",
+        "interaction": false,
+        "width": 80,
+        "height": 30,
+        "address": "/hulp/curr/fx/1/name"
+      },
+      {
+        "type": "text",
+        "top": 50,
+        "left": 10,
+        "id": "fx_value_1",
+        "interaction": false,
+        "alphaFillOff": 0,
+        "width": 80,
+        "height": 80,
+        "address": "/hulp/curr/fx/1/value",
+        "onValue": "set(id, value[1])\nset(\"knob_1\", value[0])"
+      },
+
+      {
+        "type": "knob",
+        "top": 50,
+        "left": 100,
+        "lock": false,
+        "id": "knob_2",
+        "width": 80,
+        "height": 80,
+        "alphaFillOff": 0.1,
+        "design": "default"
+      },
+      {
+        "type": "text",
+        "top": 130,
+        "left": 100,
+        "id": "fx_name_2",
+        "interaction": false,
+        "width": 80,
+        "height": 30,
+        "address": "/hulp/curr/fx/2/name"
+      },
+      {
+        "type": "text",
+        "top": 50,
+        "left": 100,
+        "id": "fx_value_2",
+        "interaction": false,
+        "alphaFillOff": 0,
+        "width": 80,
+        "height": 80,
+        "address": "/hulp/curr/fx/2/value",
+        "onValue": "set(id, value[1])\nset(\"knob_2\", value[0])"
+      },
+
+      {
+        "type": "knob",
+        "top": 50,
+        "left": 190,
+        "lock": false,
+        "id": "knob_3",
+        "width": 80,
+        "height": 80,
+        "alphaFillOff": 0.1,
+        "design": "default"
+      },
+      {
+        "type": "text",
+        "top": 130,
+        "left": 190,
+        "id": "fx_name_3",
+        "interaction": false,
+        "width": 80,
+        "height": 30,
+        "address": "/hulp/curr/fx/3/name"
+      },
+      {
+        "type": "text",
+        "top": 50,
+        "left": 190,
+        "id": "fx_value_3",
+        "interaction": false,
+        "alphaFillOff": 0,
+        "width": 80,
+        "height": 80,
+        "address": "/hulp/curr/fx/3/value",
+        "onValue": "set(id, value[1])\nset(\"knob_3\", value[0])"
+      },
+
+      {
+        "type": "knob",
+        "top": 50,
+        "left": 280,
+        "lock": false,
+        "id": "knob_4",
+        "width": 80,
+        "height": 80,
+        "alphaFillOff": 0.1,
+        "design": "default"
+      },
+      {
+        "type": "text",
+        "top": 130,
+        "left": 280,
+        "id": "fx_name_4",
+        "interaction": false,
+        "width": 80,
+        "height": 30,
+        "address": "/hulp/curr/fx/4/name"
+      },
+      {
+        "type": "text",
+        "top": 50,
+        "left": 280,
+        "id": "fx_value_4",
+        "interaction": false,
+        "alphaFillOff": 0,
+        "width": 80,
+        "height": 80,
+        "address": "/hulp/curr/fx/4/value",
+        "onValue": "set(id, value[1])\nset(\"knob_4\", value[0])"
+      },
+
+      {
+        "type": "knob",
+        "top": 170,
+        "left": 10,
+        "lock": false,
+        "id": "knob_5",
+        "width": 80,
+        "height": 80,
+        "alphaFillOff": 0.1,
+        "design": "default"
+      },
+      {
+        "type": "text",
+        "top": 250,
+        "left": 10,
+        "id": "fx_name_5",
+        "interaction": false,
+        "width": 80,
+        "height": 30,
+        "address": "/hulp/curr/fx/5/name"
+      },
+      {
+        "type": "text",
+        "top": 170,
+        "left": 10,
+        "id": "fx_value_5",
+        "interaction": false,
+        "alphaFillOff": 0,
+        "width": 80,
+        "height": 80,
+        "address": "/hulp/curr/fx/5/value",
+        "onValue": "set(id, value[1])\nset(\"knob_5\", value[0])"
+      },
+
+      {
+        "type": "knob",
+        "top": 170,
+        "left": 100,
+        "lock": false,
+        "id": "knob_6",
+        "width": 80,
+        "height": 80,
+        "alphaFillOff": 0.1,
+        "design": "default"
+      },
+      {
+        "type": "text",
+        "top": 250,
+        "left": 100,
+        "id": "fx_name_6",
+        "interaction": false,
+        "width": 80,
+        "height": 30,
+        "address": "/hulp/curr/fx/6/name"
+      },
+      {
+        "type": "text",
+        "top": 170,
+        "left": 100,
+        "id": "fx_value_6",
+        "interaction": false,
+        "alphaFillOff": 0,
+        "width": 80,
+        "height": 80,
+        "address": "/hulp/curr/fx/6/value",
+        "onValue": "set(id, value[1])\nset(\"knob_6\", value[0])"
+      },
+
+      {
+        "type": "knob",
+        "top": 170,
+        "left": 190,
+        "lock": false,
+        "id": "knob_7",
+        "width": 80,
+        "height": 80,
+        "alphaFillOff": 0.1,
+        "design": "default"
+      },
+      {
+        "type": "text",
+        "top": 250,
+        "left": 190,
+        "id": "fx_name_7",
+        "interaction": false,
+        "width": 80,
+        "height": 30,
+        "address": "/hulp/curr/fx/7/name"
+      },
+      {
+        "type": "text",
+        "top": 170,
+        "left": 190,
+        "id": "fx_value_7",
+        "interaction": false,
+        "alphaFillOff": 0,
+        "width": 80,
+        "height": 80,
+        "address": "/hulp/curr/fx/7/value",
+        "onValue": "set(id, value[1])\nset(\"knob_7\", value[0])"
+      },
+
+      {
+        "type": "knob",
+        "top": 170,
+        "left": 280,
+        "lock": false,
+        "id": "knob_8",
+        "width": 80,
+        "height": 80,
+        "alphaFillOff": 0.1,
+        "design": "default"
+      },
+      {
+        "type": "text",
+        "top": 250,
+        "left": 280,
+        "id": "fx_name_8",
+        "interaction": false,
+        "width": 80,
+        "height": 30,
+        "address": "/hulp/curr/fx/8/name"
+      },
+      {
+        "type": "text",
+        "top": 170,
+        "left": 280,
+        "id": "fx_value_8",
+        "interaction": false,
+        "alphaFillOff": 0,
+        "width": 80,
+        "height": 80,
+        "address": "/hulp/curr/fx/8/value",
+        "onValue": "set(id, value[1])\nset(\"knob_8\", value[0])"
+      }
+    ]
+  }
+}

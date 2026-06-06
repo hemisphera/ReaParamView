@@ -1,0 +1,56 @@
+@inject OscService OscService
+@using Hemisphera.Hulp.Shared
+@implements IDisposable
+
+<div class="fx-wrapper">
+    <div class="fx-section-label">FX Parameters</div>
+    @if (_trackName != null)
+    {
+        <div class="fx-header">
+            <span class="fx-header-track">Track</span>
+            <span class="fx-header-name">@_trackName</span>
+        </div>
+    }
+    <div class="fx-grid">
+        @for (var slot = 0; slot < Constants.NoOfParameters; slot++)
+        {
+            var param = OscService.FxParameters[slot];
+            if (!string.IsNullOrEmpty(param.Name))
+            {
+                var pct = Math.Clamp(param.Percentage, 0.0, 1.0) * 100.0;
+                <div class="fx-card">
+                    <div class="fx-card-fill"
+                         style="width: @pct.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                    <div class="fx-card-name" title="@param.Name">@param.Name</div>
+                    <div class="fx-card-value">@param.FormattedValue</div>
+                    <div class="fx-card-pct">@pct.ToString("F0")%</div>
+                </div>
+            }
+            else
+            {
+                <div class="fx-card fx-card-empty"></div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private string? _trackName;
+
+    protected override void OnInitialized()
+    {
+        OscService.FxParametersChanged += Refresh;
+    }
+
+    private void Refresh()
+    {
+        _trackName = OscService.CurrentTrackName;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        OscService.FxParametersChanged -= Refresh;
+    }
+
+}
