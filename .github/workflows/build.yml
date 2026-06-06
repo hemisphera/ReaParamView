@@ -53,13 +53,13 @@ jobs:
         include:
           - os: windows-latest
             rid: win-x64
-            artifact: reaper_reafxview.dll
+            artifact: reaper_hulp.dll
           - os: ubuntu-latest
             rid: linux-x64
-            artifact: reaper_reafxview.so
+            artifact: reaper_hulp.so
           - os: macos-latest
             rid: osx-arm64
-            artifact: reaper_reafxview.dylib
+            artifact: reaper_hulp.dylib
 
     steps:
       - uses: actions/checkout@v4
