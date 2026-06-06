@@ -32,7 +32,7 @@ jobs:
 
       - name: Publish WebApp (framework-dependent)
         run: >
-          dotnet publish ReaParamView.WebApp/ReaParamView.WebApp.csproj
+          dotnet publish Hemisphera.Hulp.WebApp/Hemisphera.Hulp.WebApp.csproj
           -r ${{ matrix.rid }}
           -c Release
           --no-self-contained
@@ -40,7 +40,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: webapp-${{ matrix.rid }}
-          path: ReaParamView.WebApp/bin/Release/net10.0/${{ matrix.rid }}/publish/
+          path: Hemisphera.Hulp.WebApp/bin/Release/net10.0/${{ matrix.rid }}/publish/
 
   # ── Plugin (native AOT, per-platform) ───────────────────────────────────────
   build-plugin:
@@ -75,11 +75,11 @@ jobs:
 
       - name: Publish Plugin
         run: >
-          dotnet publish ReaParamView.Plugin/ReaParamView.Plugin.csproj
+          dotnet publish Hemisphera.Hulp.Plugin/Hemisphera.Hulp.Plugin.csproj
           -r ${{ matrix.rid }}
           -c Release
 
       - uses: actions/upload-artifact@v4
         with:
           name: plugin-${{ matrix.rid }}
-          path: ReaParamView.Plugin/bin/Release/net10.0/${{ matrix.rid }}/publish/${{ matrix.artifact }}
+          path: Hemisphera.Hulp.Plugin/bin/Release/net10.0/${{ matrix.rid }}/publish/${{ matrix.artifact }}
