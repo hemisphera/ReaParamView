@@ -12,16 +12,10 @@
         </div>
     }
     <div class="fx-grid">
-        @{
-            var bySlot = new Dictionary<int, ParameterDto>();
-            for (var i = 0; i < OscService.FxParameters.Envelopes.Length; i++)
-            {
-                bySlot.Add(i, OscService.FxParameters.Envelopes[i]);
-            }
-        }
-        @for (var slot = 0; slot < 8; slot++)
+        @for (var slot = 0; slot < Constants.NoOfParameters; slot++)
         {
-            if (bySlot.TryGetValue(slot, out var param) && !string.IsNullOrEmpty(param.Name))
+            var param = OscService.FxParameters[slot];
+            if (!string.IsNullOrEmpty(param.Name))
             {
                 var pct = Math.Clamp(param.Percentage, 0.0, 1.0) * 100.0;
                 <div class="fx-card">
@@ -50,7 +44,7 @@
 
     private void Refresh()
     {
-        _trackName = OscService.FxParameters.TrackName;
+        _trackName = OscService.CurrentTrackName;
         InvokeAsync(StateHasChanged);
     }
 

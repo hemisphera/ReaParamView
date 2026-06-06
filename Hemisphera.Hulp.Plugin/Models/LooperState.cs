@@ -1,19 +1,18 @@
 using System.Diagnostics;
-using System.Threading.Channels;
+using Hemisphera.Hulp.Plugin.Infrastructure;
 using Hemisphera.Hulp.Plugin.Settings;
-using Hsp.Osc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ReaSharp;
 using ReaSharp.Models;
 
-namespace Hemisphera.Hulp.Plugin.Models.Looper;
+namespace Hemisphera.Hulp.Plugin.Models;
 
 public class LooperState
 {
   private readonly ILogger<LooperState> _logger;
   private readonly IOptionsMonitor<LooperSettings> _settings;
-  private readonly ChannelWriter<IMessage> _writer;
+  private readonly HulpMonitor _monitor;
   private readonly Transport _transport;
   private double _lookaheadBeats;
 
@@ -36,11 +35,15 @@ public class LooperState
   public Song? CurrentSong { get; private set; }
 
 
-  public LooperState(ILogger<LooperState> logger, IOptionsMonitor<LooperSettings> settings, ChannelWriter<IMessage> writer)
+  public LooperState(
+    ILogger<LooperState> logger,
+    IOptionsMonitor<LooperSettings> settings,
+    HulpMonitor monitor
+  )
   {
     _logger = logger;
     _settings = settings;
-    _writer = writer;
+    _monitor = monitor;
     _transport = new Transport(Project.Default);
     UpcomingArea.ValueChangedCallback += UpcomingAreaChanged;
     ActiveArea.ValueChangedCallback += ActiveAreaChanged;
@@ -101,16 +104,9 @@ public class LooperState
         song.SetActive(now.IsWithin(song.Region));
       }
 
-      //var setlist = await SetlistDto.Load(songs);
-      //await _writer.WriteAsync(setlist.GetOscMessage());
-
       CurrentSong = songs.FirstOrDefault(s => now.IsWithin(s.Region));
       CurrentSong?.Initialize(now);
-      if (CurrentSong != null)
-      {
-        CurrentSong.Dump(_logger);
-        await _writer.WriteAsync(CurrentSong.GetOscMessage());
-      }
+      _monitor.LoadSong(CurrentSong);
 
       _timer = Stopwatch.StartNew();
     }

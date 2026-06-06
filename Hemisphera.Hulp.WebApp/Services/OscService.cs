@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net;
 using Hsp.Osc;
 using ReaParamView.Types;
+using ReaParamView.WebApp.Models;
 
 namespace ReaParamView.WebApp.Services;
 
@@ -11,24 +12,32 @@ public class OscService : BackgroundService
   private readonly ILogger<OscService> _logger;
 
   // FX Parameters
-  private readonly ParameterSetDto _fxParameters = new();
-  public ParameterSetDto FxParameters => _fxParameters;
+  public string CurrentTrackName
+  {
+    get => field;
+    private set
+    {
+      field = value;
+      FxParametersChanged?.Invoke();
+    }
+  } = string.Empty;
+
+  public FxParameter[] FxParameters { get; } = Enumerable.Range(0, Constants.NoOfParameters).Select(index => new FxParameter(index)).ToArray();
   public event Action? FxParametersChanged;
 
   // Transport
   public TransportState Transport { get; } = new();
   public event Action? TransportChanged;
   private long _lastPositionNotify;
-  private long _lastVuNotify;
 
   // Tracks (8 fixed slots, indexed 0–7; logical index 1–8)
-  private readonly TrackInfo[] _tracks = Enumerable.Range(0, 8).Select(_ => new TrackInfo()).ToArray();
+  private readonly TrackInfo[] _tracks = Enumerable.Range(0, Constants.NoOfTracks).Select(i => new TrackInfo(i)).ToArray();
   public IReadOnlyList<TrackInfo> Tracks => _tracks;
   public event Action? TracksChanged;
 
   // Upcoming events
   private readonly UpcomingEvent[] _events;
-  private readonly object _eventsLock = new();
+  private readonly Lock _eventsLock = new();
 
   public IReadOnlyList<UpcomingEvent> GetUpcomingEvents()
   {
@@ -50,24 +59,26 @@ public class OscService : BackgroundService
   {
     using var server = new OscUdpServer(IPAddress.Any, Port);
 
-    server.RegisterHandler("^/hulp/curr/name$", ctx =>
-    {
-      _fxParameters.TrackName = ctx.Message.Atoms.FirstOrDefault().StringValue;
-      FxParametersChanged?.Invoke();
-    });
+    server.RegisterHandler("^/hulp/curr/name$", ctx => { CurrentTrackName = ctx.Message.Atoms.FirstOrDefault().StringValue ?? string.Empty; });
 
     server.RegisterHandler(@"^/hulp/curr/fx/(\d+)/name$", ctx =>
     {
       var slot = int.Parse(ctx.Match.Groups[1].Value);
-      _fxParameters.Envelopes[slot - 1].Name = ctx.Message.Atoms.FirstOrDefault().StringValue;
+      FxParameters[slot - 1].Name = ctx.Message.Atoms.FirstOrDefault().StringValue;
+      FxParametersChanged?.Invoke();
+    });
+
+    server.RegisterHandler(@"^/hulp/curr/fx/(\d+)/value/str$", ctx =>
+    {
+      var slot = int.Parse(ctx.Match.Groups[1].Value);
+      FxParameters[slot - 1].FormattedValue = ctx.Message.Atoms.LastOrDefault().StringValue ?? string.Empty;
       FxParametersChanged?.Invoke();
     });
 
     server.RegisterHandler(@"^/hulp/curr/fx/(\d+)/value$", ctx =>
     {
       var slot = int.Parse(ctx.Match.Groups[1].Value);
-      _fxParameters.Envelopes[slot - 1].Percentage = ctx.Message.Atoms.FirstOrDefault().Double64Value;
-      _fxParameters.Envelopes[slot - 1].FormattedValue = ctx.Message.Atoms.LastOrDefault().StringValue ?? string.Empty;
+      FxParameters[slot - 1].Percentage = ctx.Message.Atoms.FirstOrDefault().Double64Value;
       FxParametersChanged?.Invoke();
     });
 
@@ -104,8 +115,6 @@ public class OscService : BackgroundService
       }
     });
 
-
-    // ── Region ───────────────────────────────────────────────────────────
     server.RegisterHandler("^/hulp/region$", ctx =>
     {
       var atoms = ctx.Message.Atoms;
@@ -115,62 +124,42 @@ public class OscService : BackgroundService
       TransportChanged?.Invoke();
     });
 
-    // ── Tracks (from hulp plugin, path index = logical index, 1-based) ──
-    server.RegisterHandler(@"^/hulp/track/(\d+)$", ctx =>
+    server.RegisterHandler(@"^/hulp/track/(\d+)/name$", ctx =>
     {
-      // Use the path index as the authoritative slot so the handler fires
-      // even when atoms are incomplete (plugin not yet implemented).
-      var pathIndex = int.Parse(ctx.Match.Groups[1].Value); // 1-based
-      var slot = pathIndex - 1;
-      if ((uint)slot >= 8u) return;
-
-      var atoms = ctx.Message.Atoms;
-      _tracks[slot].Name = atoms.Count > 0 ? atoms[0].StringValue ?? string.Empty : string.Empty;
-      _tracks[slot].LogicalIndex = pathIndex;
-      _tracks[slot].ReaperIndex = atoms.Count > 2 ? atoms[2].Int32Value : 0;
-      _tracks[slot].IsActive = true;
+      var index = int.Parse(ctx.Match.Groups[1].Value); // 1-based
+      _tracks[index - 1].Name = ctx.Message.Atoms.FirstOrDefault().StringValue ?? string.Empty;
       TracksChanged?.Invoke();
     });
 
-    // Track state from REAPER standard OSC
-    server.RegisterHandler(@"^/track/(\d+)/recarm$", (MessageHandlerContext ctx) =>
+    server.RegisterHandler(@"^/hulp/track/(\d+)/sel$", ctx =>
     {
-      var trackNumber = int.Parse(ctx.Match.Groups[1].Value);
-      var track = _tracks.FirstOrDefault(t => t.IsActive && t.ReaperIndex == trackNumber - 1);
-      if (track == null) return;
-      track.IsRecArmed = ctx.Message.Atoms.FirstOrDefault().Float32Value > 0.5f;
+      var index = int.Parse(ctx.Match.Groups[1].Value); // 1-based
+      _tracks[index - 1].Selected = ctx.Message.Atoms.FirstOrDefault().BoolValue;
       TracksChanged?.Invoke();
     });
 
-    server.RegisterHandler(@"^/track/(\d+)/select$", (MessageHandlerContext ctx) =>
+    server.RegisterHandler(@"^/hulp/track/(\d+)/mute$", ctx =>
     {
-      var trackNumber = int.Parse(ctx.Match.Groups[1].Value);
-      var track = _tracks.FirstOrDefault(t => t.IsActive && t.ReaperIndex == trackNumber - 1);
-      if (track == null) return;
-      track.IsSelected = ctx.Message.Atoms.FirstOrDefault().Float32Value > 0.5f;
+      var index = int.Parse(ctx.Match.Groups[1].Value); // 1-based
+      _tracks[index - 1].Mute = ctx.Message.Atoms.FirstOrDefault().BoolValue;
       TracksChanged?.Invoke();
     });
 
-    server.RegisterHandler(@"^/track/(\d+)/vu$", (MessageHandlerContext ctx) =>
+    server.RegisterHandler(@"^/hulp/track/(\d+)/solo$", ctx =>
     {
-      var trackNumber = int.Parse(ctx.Match.Groups[1].Value);
-      var track = _tracks.FirstOrDefault(t => t.IsActive && t.ReaperIndex == trackNumber - 1);
-      if (track == null) return;
-
-      track.VuLevel = Math.Clamp(ctx.Message.Atoms.FirstOrDefault().Float32Value, 0f, 1f);
-
-      var now = Stopwatch.GetTimestamp();
-      if (Stopwatch.GetElapsedTime(_lastVuNotify, now).TotalMilliseconds < 250)
-      {
-        return;
-      }
-
-      _lastVuNotify = now;
+      var index = int.Parse(ctx.Match.Groups[1].Value); // 1-based
+      _tracks[index - 1].Solo = ctx.Message.Atoms.FirstOrDefault().BoolValue;
       TracksChanged?.Invoke();
     });
 
+    server.RegisterHandler(@"^/hulp/track/(\d+)/recarm$", ctx =>
+    {
+      var index = int.Parse(ctx.Match.Groups[1].Value); // 1-based
+      _tracks[index - 1].RecArm = ctx.Message.Atoms.FirstOrDefault().BoolValue;
+      TracksChanged?.Invoke();
+    });
     // ── Upcoming Events ──────────────────────────────────────────────────
-    server.RegisterHandler(@"^/hulp/event/(\d+)$", (MessageHandlerContext ctx) =>
+    server.RegisterHandler(@"^/hulp/event/(\d+)$", ctx =>
     {
       var eventNumber = int.Parse(ctx.Match.Groups[1].Value);
       var atoms = ctx.Message.Atoms;

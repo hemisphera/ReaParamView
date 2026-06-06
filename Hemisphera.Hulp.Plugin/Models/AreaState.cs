@@ -1,4 +1,4 @@
-﻿namespace Hemisphera.Hulp.Plugin.Models.Looper;
+﻿namespace Hemisphera.Hulp.Plugin.Models;
 
 public enum AreaState
 {

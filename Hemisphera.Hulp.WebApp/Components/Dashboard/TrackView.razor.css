@@ -9,7 +9,7 @@
 
 .tv-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     grid-template-rows: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
     flex: 1;
@@ -32,10 +32,14 @@
     position: relative;
 }
 
-.tv-card--inactive {
+.tv-card--muted {
     background: rgba(255,255,255,0.01);
     border-color: rgba(255,255,255,0.03);
-    opacity: 0.3;
+}
+
+.tv-card--soloed {
+    background: rgba(234, 179, 8, 0.12);
+    border-color: rgba(234, 179, 8, 0.4);
 }
 
 .tv-card--armed {
@@ -47,11 +51,6 @@
     border-color: rgba(0, 212, 170, 0.5);
     background: rgba(0, 212, 170, 0.07);
     box-shadow: 0 0 12px rgba(0, 212, 170, 0.1);
-}
-
-.tv-card--armed.tv-card--selected {
-    background: rgba(220, 38, 38, 0.15);
-    border-color: rgba(220, 38, 38, 0.55);
 }
 
 .tv-card-index {
@@ -67,13 +66,17 @@
 }
 
 .tv-card-name {
-    font-size: 0.78rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #cbd5e1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.2;
+}
+
+.tv-card--selected .tv-card-name {
+    color: #00d4aa;
 }
 
 .tv-card-header {
@@ -85,12 +88,3 @@
     z-index: 1;
 }
 
-.tv-vu-fill {
-    position: absolute;
-    inset: 0;
-    transform-origin: bottom center;
-    transform: scaleY(0);
-    background: linear-gradient(0deg, rgba(34, 197, 94, 0.48) 0%, rgba(234, 179, 8, 0.52) 72%, rgba(239, 68, 68, 0.64) 100%);
-    transition: transform 0.18s linear;
-    pointer-events: none;
-}

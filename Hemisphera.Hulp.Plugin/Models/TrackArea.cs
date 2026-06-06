@@ -5,7 +5,7 @@ using ReaSharp;
 using ReaSharp.Models;
 using ReaSharp.Utils;
 
-namespace Hemisphera.Hulp.Plugin.Models.Looper;
+namespace Hemisphera.Hulp.Plugin.Models;
 
 public sealed class TrackArea : IDisposable
 {

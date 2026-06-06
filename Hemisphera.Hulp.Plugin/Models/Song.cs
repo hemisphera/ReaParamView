@@ -1,10 +1,9 @@
-﻿using Hemisphera.Hulp.Plugin.Infrastructure;
-using Hsp.Osc;
+﻿using Hsp.Osc;
 using Microsoft.Extensions.Logging;
 using ReaSharp;
 using ReaSharp.Models;
 
-namespace Hemisphera.Hulp.Plugin.Models.Looper;
+namespace Hemisphera.Hulp.Plugin.Models;
 
 public sealed class Song : IDisposable
 {

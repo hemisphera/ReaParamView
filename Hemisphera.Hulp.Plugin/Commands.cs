@@ -1,4 +1,4 @@
-﻿using Hemisphera.Hulp.Plugin.Models.Looper;
+﻿using Hemisphera.Hulp.Plugin.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReaSharp.Models;
