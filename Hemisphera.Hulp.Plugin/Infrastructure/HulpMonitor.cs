@@ -17,7 +17,7 @@ public class HulpMonitor
 
   private Track? _currentTrack;
 
-  private MonitoredParameter?[] _monitoredParameters = new MonitoredParameter?[Constants.NoOfParameters];
+  private List<MonitoredParameter> _monitoredParameters { get; } = [];
 
   private readonly HulpState _state;
   private readonly ParameterSate[] _parameters;
@@ -134,38 +134,35 @@ public class HulpMonitor
     if (selectedTrack?.ReaperHandle == _currentTrack?.ReaperHandle) return;
 
     _currentTrack = selectedTrack;
+    _monitoredParameters.Clear();
     _state.CurrentTrackName = _currentTrack?.Name ?? string.Empty;
     if (_currentTrack == null)
     {
       _logger.LogDebug("No track selected");
-      _monitoredParameters = new MonitoredParameter[Constants.NoOfParameters];
       return;
     }
 
-    var paramFactory = new MonitoredParameterFactory(_currentTrack);
-    _monitoredParameters = paramFactory.Build()
-      .Concat(Enumerable.Repeat<MonitoredParameter?>(null, Constants.NoOfParameters))
-      .Take(Constants.NoOfParameters)
-      .ToArray();
-
+    var paramFactory = new MonitoredParameterFactory(_currentTrack, _logger);
+    _monitoredParameters.AddRange(paramFactory.Build());
     if (_logger.IsEnabled(LogLevel.Debug))
     {
       _logger.LogDebug("Track '{track}' selected", _currentTrack.Name);
-      foreach (var linkedParameter in _monitoredParameters)
+      foreach (var item in _monitoredParameters)
       {
-        _logger.LogDebug("Loaded linked parameter: {lp}", linkedParameter);
+        _logger.LogDebug("Loaded linked parameter: {lp}", item);
       }
     }
   }
 
   private void UpdateParameters()
   {
-    for (var i = 0; i < _monitoredParameters.Length; i++)
+    for (var i = 0; i < _parameters.Length; i++)
     {
-      _monitoredParameters[i]?.UpdateValue();
-      _parameters[i].Name = _monitoredParameters[i]?.Name ?? string.Empty;
-      _parameters[i].Percentage = _monitoredParameters[i]?.Percentage ?? 0.0;
-      _parameters[i].FormattedValue = _monitoredParameters[i]?.FormattedValue ?? string.Empty;
+      var mp = _monitoredParameters.FirstOrDefault(p => p.Index == i);
+      mp?.UpdateValue();
+      _parameters[i].Name = mp?.Name ?? string.Empty;
+      _parameters[i].Percentage = mp?.Percentage ?? 0.0;
+      _parameters[i].FormattedValue = mp?.FormattedValue ?? string.Empty;
     }
   }
 

@@ -39,7 +39,6 @@ public class MonitoredParameter
     var parameterValue = parameter.GetValueNormalized();
     Value = parameterValue;
     FormattedValue = parameter.GetFormattedValue();
-    //Percentage = (parameterValue - MinValue) / (MaxValue - MinValue);
     Percentage = Value;
   }
 
@@ -51,6 +50,6 @@ public class MonitoredParameter
 
   public override string ToString()
   {
-    return $"{Name} (slot {Index + 1} [{MinValue} - {MaxValue}]";
+    return $"{Name} (slot {Index + 1} => FX {TargetFxIndex}/{TargetFxParameterIndex} [{MinValue} - {MaxValue}]";
   }
 }

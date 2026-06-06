@@ -67,7 +67,10 @@ public class OscTransport : ITransport
   {
     _logger.LogInformation("Disconnecting ...");
     if (_client != null)
+    {
       await _client.DisconnectAsync();
+    }
+
     _logger.LogInformation("Disconnected");
   }
 

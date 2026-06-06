@@ -1,6 +1,8 @@
-﻿using Hemisphera.Hulp.Plugin.Models;
+﻿using Hemisphera.Hulp.Plugin.Infrastructure;
+using Hemisphera.Hulp.Plugin.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ReaSharp;
 using ReaSharp.Models;
 
 namespace Hemisphera.Hulp.Plugin;
@@ -39,5 +41,13 @@ public class Commands
   {
     var state = provider.GetRequiredService<LooperState>();
     await state.Initialize();
+  }
+
+  public static async Task Restart(IServiceProvider arg1, ActionContext arg2)
+  {
+    var ct = CancellationToken.None;
+    var transport = PluginState.Instance.Services.GetRequiredService<ITransport>();
+    await transport.StopAsync(ct);
+    await transport.StartAsync(ct);
   }
 }

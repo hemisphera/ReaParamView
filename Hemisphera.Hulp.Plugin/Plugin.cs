@@ -59,6 +59,7 @@ public static class Plugin
       commands.Register("HULP_DEBUG", "Hulp: Print Debug Info", Commands.DumpDebug);
       commands.Register("HULP_FOCUS", "Hulp: Focus song", Commands.FocusCurrentSong);
       commands.Register("HULP_INIT", "Hulp: Initialize", Commands.Initialize);
+      commands.Register("HULP_RESTART", "Hulp: Restart", Commands.Restart);
 
       var monitor = state.Services.GetRequiredService<HulpMonitor>();
       _ = monitor.Start();
