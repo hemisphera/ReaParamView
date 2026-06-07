@@ -17,15 +17,17 @@ public class HulpMonitor
 
   private Track? _currentTrack;
 
-  private List<MonitoredParameter> _monitoredParameters { get; } = [];
+  private readonly List<MonitoredParameter> _monitoredParameters = [];
 
   private readonly HulpState _state;
   private readonly ParameterSate[] _parameters;
   private readonly TrackState[] _tracks;
+  private readonly EventState[] _events;
   private Song? _currentSong;
   private readonly SemaphoreSlim _lock = new(1, 1);
 
   private CancellationTokenSource? _cancellationTokenSource;
+  private Transport? _transport;
 
 
   public HulpMonitor(ILogger<HulpMonitor> logger, IOscWriter osc)
@@ -47,6 +49,12 @@ public class HulpMonitor
       item.PropertyChanged += TrackPropertyChangedCallback;
       return item;
     }).ToArray();
+    _events = Enumerable.Range(0, Constants.NoOfEvents).Select(index =>
+    {
+      var item = new EventState(index);
+      item.PropertyChanged += EventPropertyChangedCallback;
+      return item;
+    }).ToArray();
   }
 
 
@@ -55,6 +63,22 @@ public class HulpMonitor
     if (sender is not HulpState state) return;
     if (e.PropertyName is nameof(state.CurrentTrackName) or "")
       _osc.WriteAsync(state.CurrentTrackName.ToOscMessage("/hulp/curr"));
+    if (e.PropertyName is nameof(state.Beat) or "")
+    {
+      var text = $"{state.Beat.Beat}/{state.Beat.Length}";
+      _osc.WriteAsync(text.ToOscMessage("/hulp/beat"));
+    }
+
+    if (e.PropertyName is nameof(state.Region) or "")
+    {
+      var start = state.Region?.Start.TotalSeconds ?? 0.0;
+      var end = state.Region?.End.TotalSeconds ?? 0.0;
+      var msg = new Message("/hulp/region").PushAtom(start).PushAtom(end);
+      _osc.WriteAsync(msg);
+    }
+
+    if (e.PropertyName is nameof(state.QuarterNotePosition) or "")
+      _osc.WriteAsync(state.QuarterNotePosition.ToOscMessage("/hulp/qnpos"));
   }
 
   private void ParameterPropertyChangedCallback(object? sender, PropertyChangedEventArgs e)
@@ -85,6 +109,15 @@ public class HulpMonitor
       _osc.WriteAsync(state.RecordArm.ToOscMessage(baseAddress + "/recarm"));
   }
 
+  private void EventPropertyChangedCallback(object? sender, PropertyChangedEventArgs e)
+  {
+    if (sender is not EventState state) return;
+    var baseAddress = $"/hulp/event/{state.Index + 1}";
+    if (e.PropertyName is nameof(state.Text) or "")
+      _osc.WriteAsync(state.Text.ToOscMessage(baseAddress + "/text"));
+    if (e.PropertyName is nameof(state.Position) or "")
+      _osc.WriteAsync(state.Position.ToOscMessage(baseAddress + "/pos"));
+  }
 
   public async Task Start()
   {
@@ -112,6 +145,7 @@ public class HulpMonitor
         {
           await _lock.WaitAsync(token);
           UpdateCurrentTrack();
+          UpdateTempo();
           UpdateParameters();
           UpdateTracks();
         }
@@ -127,6 +161,13 @@ public class HulpMonitor
     }
   }
 
+  private void UpdateTempo()
+  {
+    _transport?.Update();
+    var sig = _transport?.GetTimeSignature();
+    _state.Beat = new BeatInfo((int)(sig?.Beats ?? -1) + 1, sig?.Numerator ?? 0);
+    _state.QuarterNotePosition = (int)(_transport?.TimeToQuarterNotes() ?? 0);
+  }
 
   private void UpdateCurrentTrack()
   {
@@ -179,12 +220,50 @@ public class HulpMonitor
     }
   }
 
+  private void LoadEvents(Transport transport)
+  {
+    var events = CollectEvents().ToArray();
+    for (var i = 0; i < _events.Length; i++)
+    {
+      var hulpEvent = events.FirstOrDefault(e => e.Index == i);
+      _events[i].Text = hulpEvent?.Text ?? string.Empty;
+      _events[i].Position = transport.TimeToQuarterNotes(TimeSpan.FromSeconds(hulpEvent?.Time ?? 0.0));
+    }
+  }
+
+  private IEnumerable<HulpEvent> CollectEvents()
+  {
+    var index = 0;
+    foreach (var area in _currentSong?.RecordingAreas ?? [])
+    {
+      yield return new HulpEvent
+      {
+        Index = index++,
+        Text = $"Record: {area.Name} {area.Item.Track.Name}",
+        Time = area.Item.Start.TotalSeconds
+      };
+    }
+
+    foreach (var sel in _currentSong?.Selectors ?? [])
+    {
+      yield return new HulpEvent
+      {
+        Index = index++,
+        Text = $"Select: {sel.Track.Name}",
+        Time = sel.Start.TotalSeconds
+      };
+    }
+  }
+
   public void LoadSong(Song? currentSong)
   {
     try
     {
       _lock.Wait();
       _currentSong = currentSong;
+      _state.Region = currentSong?.Region;
+      _transport = new Transport(Project.Current);
+      LoadEvents(_transport);
       FullRefresh();
       _logger.LogDebug("Loaded song: [{song}]", currentSong?.Name ?? string.Empty);
     }
@@ -197,9 +276,11 @@ public class HulpMonitor
   public void FullRefresh()
   {
     StatePropertyChangedCallback(_state, new PropertyChangedEventArgs(string.Empty));
-    foreach (var fx in _parameters)
-      ParameterPropertyChangedCallback(fx, new PropertyChangedEventArgs(string.Empty));
-    foreach (var track in _tracks)
-      TrackPropertyChangedCallback(track, new PropertyChangedEventArgs(string.Empty));
+    foreach (var item in _parameters)
+      ParameterPropertyChangedCallback(item, new PropertyChangedEventArgs(string.Empty));
+    foreach (var item in _tracks)
+      TrackPropertyChangedCallback(item, new PropertyChangedEventArgs(string.Empty));
+    foreach (var item in _events)
+      EventPropertyChangedCallback(item, new PropertyChangedEventArgs(string.Empty));
   }
 }

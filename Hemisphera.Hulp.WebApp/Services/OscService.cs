@@ -22,16 +22,15 @@ public class OscService : BackgroundService
     }
   } = string.Empty;
 
-  public FxParameter[] FxParameters { get; } = Enumerable.Range(0, Constants.NoOfParameters).Select(index => new FxParameter(index)).ToArray();
+  public FxParameter[] FxParameters { get; }
   public event Action? FxParametersChanged;
 
   // Transport
   public TransportState Transport { get; } = new();
   public event Action? TransportChanged;
-  private long _lastPositionNotify;
 
   // Tracks (8 fixed slots, indexed 0–7; logical index 1–8)
-  private readonly TrackInfo[] _tracks = Enumerable.Range(0, Constants.NoOfTracks).Select(i => new TrackInfo(i)).ToArray();
+  private readonly TrackInfo[] _tracks;
   public IReadOnlyList<TrackInfo> Tracks => _tracks;
   public event Action? TracksChanged;
 
@@ -43,7 +42,7 @@ public class OscService : BackgroundService
   {
     lock (_eventsLock)
     {
-      return _events.Where(e => !string.IsNullOrEmpty(e.Text)).OrderBy(e => e.Time).ToList();
+      return _events.Where(e => e.Visible).OrderBy(e => e.Position).ToList();
     }
   }
 
@@ -52,7 +51,9 @@ public class OscService : BackgroundService
   public OscService(ILogger<OscService> logger)
   {
     _logger = logger;
+    _tracks = Enumerable.Range(0, Constants.NoOfTracks).Select(i => new TrackInfo(i)).ToArray();
     _events = Enumerable.Range(0, 24).Select(_ => new UpcomingEvent()).ToArray();
+    FxParameters = Enumerable.Range(0, Constants.NoOfParameters).Select(index => new FxParameter(index)).ToArray();
   }
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -83,7 +84,6 @@ public class OscService : BackgroundService
     });
 
 
-    // ── Transport (REAPER standard OSC) ──────────────────────────────────
     server.RegisterHandler("^/play$", ctx =>
     {
       Transport.IsPlaying = ctx.Message.Atoms.FirstOrDefault().Float32Value > 0.5f;
@@ -102,17 +102,11 @@ public class OscService : BackgroundService
       TransportChanged?.Invoke();
     });
 
-    server.RegisterHandler("^/time$", ctx =>
+    server.RegisterHandler("^/hulp/qnpos$", ctx =>
     {
-      Transport.Position = ctx.Message.Atoms.FirstOrDefault().Float32Value;
-
-      var now = Stopwatch.GetTimestamp();
-      if (Stopwatch.GetElapsedTime(now - _lastPositionNotify).TotalMilliseconds >= 500)
-      {
-        UpdateEvents(Transport.Position);
-        _lastPositionNotify = now;
-        TransportChanged?.Invoke();
-      }
+      Transport.Position = ctx.Message.Atoms.FirstOrDefault().Int32Value;
+      UpdateEvents(Transport.Position);
+      TransportChanged?.Invoke();
     });
 
     server.RegisterHandler("^/hulp/region$", ctx =>
@@ -158,19 +152,22 @@ public class OscService : BackgroundService
       _tracks[index - 1].RecArm = ctx.Message.Atoms.FirstOrDefault().BoolValue;
       TracksChanged?.Invoke();
     });
-    // ── Upcoming Events ──────────────────────────────────────────────────
-    server.RegisterHandler(@"^/hulp/event/(\d+)$", ctx =>
+    server.RegisterHandler(@"^/hulp/event/(\d+)/text$", ctx =>
     {
-      var eventNumber = int.Parse(ctx.Match.Groups[1].Value);
-      var atoms = ctx.Message.Atoms;
-      if (atoms.Count < 2) return;
-      var text = atoms[0].StringValue ?? string.Empty;
-      var time = atoms[1].Double64Value;
+      var number = int.Parse(ctx.Match.Groups[1].Value);
       lock (_eventsLock)
       {
-        var existing = _events[eventNumber - 1];
-        existing.Text = text;
-        existing.Time = time;
+        _events[number - 1].Text = ctx.Message.Atoms.FirstOrDefault().StringValue ?? string.Empty;
+      }
+
+      UpcomingEventsChanged?.Invoke();
+    });
+    server.RegisterHandler(@"^/hulp/event/(\d+)/pos$", ctx =>
+    {
+      var number = int.Parse(ctx.Match.Groups[1].Value);
+      lock (_eventsLock)
+      {
+        _events[number - 1].Position = ctx.Message.Atoms.FirstOrDefault().Double64Value;
       }
 
       UpcomingEventsChanged?.Invoke();
@@ -188,29 +185,22 @@ public class OscService : BackgroundService
     }
   }
 
-  private void UpdateEvents(double time)
+  private void UpdateEvents(double currPos)
   {
-    bool removed;
     lock (_eventsLock)
     {
-      var victims = _events
-        .Where(e => !string.IsNullOrEmpty(e.Text) && e.Time < time)
-        .ToList();
-      foreach (var victim in victims)
+      var counter = 0;
+      foreach (var item in _events.OrderBy(e => e.Position))
       {
-        victim.Time = 0;
-        victim.Text = string.Empty;
+        var isVisible = item.Position > currPos;
+        item.Index = isVisible ? counter++ : 0;
+        item.Visible = isVisible;
+        item.Countdown = null;
       }
 
-      foreach (var ev in _events)
-      {
-        ev.UpdateCountdown(time);
-      }
-
-      removed = victims.Count > 0;
+      _events.FirstOrDefault(e => e.Visible)?.UpdateCountdown(currPos);
     }
 
-    if (removed)
-      UpcomingEventsChanged?.Invoke();
+    UpcomingEventsChanged?.Invoke();
   }
 }
