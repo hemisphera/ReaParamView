@@ -1,10 +1,16 @@
+using System.Reflection;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http.Features;
 using Hemisphera.Hulp.WebApp.Components;
 using Hemisphera.Hulp.WebApp.Services;
 
-var builder = WebApplication.CreateBuilder(args);
+var options = new WebApplicationOptions
+{
+  Args = args,
+  ContentRootPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+};
+var builder = WebApplication.CreateBuilder(options);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -42,8 +48,8 @@ var addressesFeature = server.Features.GetRequiredFeature<IServerAddressesFeatur
 // Get local IP address for network access
 var hostName = System.Net.Dns.GetHostName();
 var ips = System.Net.Dns.GetHostAddresses(hostName);
-var localIp = ips.FirstOrDefault(ip => 
-  ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork && 
+var localIp = ips.FirstOrDefault(ip =>
+  ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork &&
   !ip.ToString().StartsWith("127."));
 
 if (localIp != null && addressesFeature.Addresses.Count > 0)
