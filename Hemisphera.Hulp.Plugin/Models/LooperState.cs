@@ -62,6 +62,7 @@ public class LooperState
     {
       while (!token.IsCancellationRequested)
       {
+        await Task.Delay(5, token);
         await Tick();
       }
     }, token);

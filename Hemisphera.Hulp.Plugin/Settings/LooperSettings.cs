@@ -6,7 +6,7 @@ public class LooperSettings
   /// Number of beats to look ahead for upcoming recording start/stop triggers.
   /// Defaults to 1 beat. Should not exceed a full measure to avoid interfering with timing.
   /// </summary>
-  public double LookaheadBeats { get; set; } = 0.75;
+  public double LookaheadBeats { get; set; } = 1.0;
 
   /// <summary>
   /// Automatically selects the track of a recording area without requiring a dedicated track selector item.
