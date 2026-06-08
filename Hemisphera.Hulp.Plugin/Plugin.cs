@@ -60,6 +60,7 @@ public static class Plugin
       commands.Register("HULP_FOCUS", "Hulp: Focus song", Commands.FocusCurrentSong);
       commands.Register("HULP_INIT", "Hulp: Initialize", Commands.Initialize);
       commands.Register("HULP_RESTART", "Hulp: Restart", Commands.Restart);
+      commands.Register("HULP_SELECT", "Hulp: Select Song", Commands.SelectSong);
 
       var monitor = state.Services.GetRequiredService<HulpMonitor>();
       _ = monitor.Start();
