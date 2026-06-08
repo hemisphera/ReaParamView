@@ -15,12 +15,6 @@ public class Commands
     await state.Start();
   }
 
-  public static async Task StopLooper(IServiceProvider arg, ActionContext actionContext)
-  {
-    var state = arg.GetRequiredService<LooperState>();
-    await state.Stop();
-  }
-
   public static Task DumpDebug(IServiceProvider arg, ActionContext actionContext)
   {
     var state = arg.GetRequiredService<LooperState>();
@@ -43,7 +37,7 @@ public class Commands
     await state.Initialize();
   }
 
-  public static async Task Restart(IServiceProvider arg1, ActionContext arg2)
+  public static async Task RestartEngine(IServiceProvider arg1, ActionContext arg2)
   {
     var ct = CancellationToken.None;
     var transport = PluginState.Instance.Services.GetRequiredService<ITransport>();

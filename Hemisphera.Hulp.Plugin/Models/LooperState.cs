@@ -115,6 +115,7 @@ public class LooperState
     {
       Reaper.PreventUIRefresh.Invoke(-1);
       Reaper.UpdateArrange.Invoke();
+      Reaper.TrackList_AdjustWindows.Invoke(false);
     }
   }
 
