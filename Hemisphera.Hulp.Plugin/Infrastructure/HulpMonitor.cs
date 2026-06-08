@@ -22,6 +22,7 @@ public class HulpMonitor
   private readonly HulpState _state;
   private readonly ParameterSate[] _parameters;
   private readonly TrackState[] _tracks;
+  private readonly SongState[] _songs;
   private readonly EventState[] _events;
   private Song? _currentSong;
   private readonly SemaphoreSlim _lock = new(1, 1);
@@ -49,6 +50,12 @@ public class HulpMonitor
       item.PropertyChanged += TrackPropertyChangedCallback;
       return item;
     }).ToArray();
+    _songs = Enumerable.Range(0, Constants.NoOfSongs).Select(index =>
+    {
+      var item = new SongState(index);
+      item.PropertyChanged += SongPropertyChangedCallback;
+      return item;
+    }).ToArray();
     _events = Enumerable.Range(0, Constants.NoOfEvents).Select(index =>
     {
       var item = new EventState(index);
@@ -62,7 +69,8 @@ public class HulpMonitor
   {
     if (sender is not HulpState state) return;
     if (e.PropertyName is nameof(state.CurrentTrackName) or "")
-      _osc.WriteAsync(state.CurrentTrackName.ToOscMessage("/hulp/curr"));
+      _osc.WriteAsync(state.CurrentTrackName.ToOscMessage("/hulp/track/curr"));
+    _osc.WriteAsync(state.CurrentTrackName.ToOscMessage("/hulp/curr"));
     if (e.PropertyName is nameof(state.Beat) or "")
     {
       var text = $"{state.Beat.Beat}/{state.Beat.Length}";
@@ -73,7 +81,7 @@ public class HulpMonitor
     {
       var start = state.Region?.Start.TotalSeconds ?? 0.0;
       var end = state.Region?.End.TotalSeconds ?? 0.0;
-      var msg = new Message("/hulp/region").PushAtom(start).PushAtom(end);
+      var msg = new Message("/hulp/song/curr").PushAtom(state.Region?.Id ?? -1).PushAtom(start).PushAtom(end);
       _osc.WriteAsync(msg);
     }
 
@@ -107,6 +115,16 @@ public class HulpMonitor
       _osc.WriteAsync(state.Solo.ToOscMessage(baseAddress + "/solo"));
     if (e.PropertyName is nameof(state.RecordArm) or "")
       _osc.WriteAsync(state.RecordArm.ToOscMessage(baseAddress + "/recarm"));
+  }
+
+  private void SongPropertyChangedCallback(object? sender, PropertyChangedEventArgs e)
+  {
+    if (sender is not SongState item) return;
+    var baseAddress = $"/hulp/song/{item.Index + 1}";
+    if (e.PropertyName is nameof(item.RegionId) or "")
+      _osc.WriteAsync(item.RegionId.ToOscMessage(baseAddress + "/id"));
+    if (e.PropertyName is nameof(item.Name) or "")
+      _osc.WriteAsync(item.RegionId.ToOscMessage(baseAddress + "/name"));
   }
 
   private void EventPropertyChangedCallback(object? sender, PropertyChangedEventArgs e)
@@ -280,6 +298,8 @@ public class HulpMonitor
       ParameterPropertyChangedCallback(item, new PropertyChangedEventArgs(string.Empty));
     foreach (var item in _tracks)
       TrackPropertyChangedCallback(item, new PropertyChangedEventArgs(string.Empty));
+    foreach (var item in _songs)
+      SongPropertyChangedCallback(item, new PropertyChangedEventArgs(string.Empty));
     foreach (var item in _events)
       EventPropertyChangedCallback(item, new PropertyChangedEventArgs(string.Empty));
   }

@@ -84,22 +84,24 @@ public class LooperState
     await UpcomingArea.Set(null, true);
   }
 
-  public async Task Initialize()
+  public async Task Initialize(TimeSpan? time = null)
   {
     try
     {
       Reaper.PreventUIRefresh.Invoke(1);
       await Stop();
 
+      if (time != null)
+      {
+        _transport.CursorPosition = time.Value;
+      }
+
       _lookaheadBeats = _settings.CurrentValue.LookaheadBeats;
       _logger.LogDebug("Using lookahead of {beats} beats.", _lookaheadBeats);
       _logger.LogDebug("Using {containerTrackName} as container track.", _settings.CurrentValue.ContainerTrackName);
       _transport.Update();
       var now = _transport.PlayheadOrCursorPosition;
-      var songs = Region.Enumerate(Project.Default)
-        .Select(r => Song.FromRegion(r, _settings.CurrentValue.ContainerTrackName))
-        .OfType<Song>()
-        .ToList();
+      var songs = EnumerateSongs();
       foreach (var song in songs)
       {
         song.SetActive(now.IsWithin(song.Region));
@@ -117,6 +119,15 @@ public class LooperState
       Reaper.UpdateArrange.Invoke();
       Reaper.TrackList_AdjustWindows.Invoke(false);
     }
+  }
+
+  public List<Song> EnumerateSongs()
+  {
+    var songs = Region.Enumerate(Project.Default)
+      .Select(r => Song.FromRegion(r, _settings.CurrentValue.ContainerTrackName))
+      .OfType<Song>()
+      .ToList();
+    return songs;
   }
 
   public async Task FocusRegion()
