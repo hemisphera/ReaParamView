@@ -9,4 +9,10 @@ public class HulpState : ObservedEntity
     get => field;
     set => SetFieldValue(ref field, value);
   }
+
+  public int? CurrentSongId
+  {
+    get => field;
+    set => SetFieldValue(ref field, value);
+  }
 }

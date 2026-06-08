@@ -22,6 +22,7 @@ public class HulpMonitor
   private readonly HulpState _state;
   private readonly ParameterSate[] _parameters;
   private readonly TrackState[] _tracks;
+  private readonly SongState[] _songs;
   private Song? _currentSong;
   private readonly SemaphoreSlim _lock = new(1, 1);
 
@@ -47,6 +48,12 @@ public class HulpMonitor
       item.PropertyChanged += TrackPropertyChangedCallback;
       return item;
     }).ToArray();
+    _songs = Enumerable.Range(0, Constants.NoOfSongs).Select(index =>
+    {
+      var item = new SongState(index);
+      item.PropertyChanged += SongPropertyChangedCallback;
+      return item;
+    }).ToArray();
   }
 
 
@@ -54,7 +61,9 @@ public class HulpMonitor
   {
     if (sender is not HulpState state) return;
     if (e.PropertyName is nameof(state.CurrentTrackName) or "")
-      _osc.WriteAsync(state.CurrentTrackName.ToOscMessage("/hulp/curr"));
+      _osc.WriteAsync(state.CurrentTrackName.ToOscMessage("/hulp/track/curr"));
+    if (e.PropertyName is nameof(state.CurrentSongId) or "")
+      _osc.WriteAsync((state.CurrentSongId ?? -1).ToOscMessage("/hulp/song/curr"));
   }
 
   private void ParameterPropertyChangedCallback(object? sender, PropertyChangedEventArgs e)
@@ -85,6 +94,15 @@ public class HulpMonitor
       _osc.WriteAsync(state.RecordArm.ToOscMessage(baseAddress + "/recarm"));
   }
 
+  private void SongPropertyChangedCallback(object? sender, PropertyChangedEventArgs e)
+  {
+    if (sender is not SongState item) return;
+    var baseAddress = $"/hulp/song/{item.Index + 1}";
+    if (e.PropertyName is nameof(item.RegionId) or "")
+      _osc.WriteAsync(item.RegionId.ToOscMessage(baseAddress + "/id"));
+    if (e.PropertyName is nameof(item.Name) or "")
+      _osc.WriteAsync(item.RegionId.ToOscMessage(baseAddress + "/name"));
+  }
 
   public async Task Start()
   {
@@ -185,6 +203,7 @@ public class HulpMonitor
     {
       _lock.Wait();
       _currentSong = currentSong;
+      _state.CurrentSongId = _currentSong?.Region.Id;
       FullRefresh();
       _logger.LogDebug("Loaded song: [{song}]", currentSong?.Name ?? string.Empty);
     }
@@ -201,5 +220,7 @@ public class HulpMonitor
       ParameterPropertyChangedCallback(fx, new PropertyChangedEventArgs(string.Empty));
     foreach (var track in _tracks)
       TrackPropertyChangedCallback(track, new PropertyChangedEventArgs(string.Empty));
+    foreach (var song in _songs)
+      SongPropertyChangedCallback(song, new PropertyChangedEventArgs(string.Empty));
   }
 }
