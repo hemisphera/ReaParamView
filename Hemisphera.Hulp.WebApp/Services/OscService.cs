@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Net;
 using Hsp.Osc;
 using Hemisphera.Hulp.Shared;
@@ -60,23 +59,23 @@ public class OscService : BackgroundService
   {
     using var server = new OscUdpServer(IPAddress.Any, Port);
 
-    server.RegisterHandler("^/hulp/curr/name$", ctx => { CurrentTrackName = ctx.Message.Atoms.FirstOrDefault().StringValue ?? string.Empty; });
+    server.RegisterHandler("^/hulp/track/curr/name$", ctx => { CurrentTrackName = ctx.Message.Atoms.FirstOrDefault().StringValue ?? string.Empty; });
 
-    server.RegisterHandler(@"^/hulp/curr/fx/(\d+)/name$", ctx =>
+    server.RegisterHandler(@"^/hulp/track/curr/fx/(\d+)/name$", ctx =>
     {
       var slot = int.Parse(ctx.Match.Groups[1].Value);
       FxParameters[slot - 1].Name = ctx.Message.Atoms.FirstOrDefault().StringValue;
       FxParametersChanged?.Invoke();
     });
 
-    server.RegisterHandler(@"^/hulp/curr/fx/(\d+)/value/str$", ctx =>
+    server.RegisterHandler(@"^/hulp/track/curr/fx/(\d+)/value/str$", ctx =>
     {
       var slot = int.Parse(ctx.Match.Groups[1].Value);
       FxParameters[slot - 1].FormattedValue = ctx.Message.Atoms.LastOrDefault().StringValue ?? string.Empty;
       FxParametersChanged?.Invoke();
     });
 
-    server.RegisterHandler(@"^/hulp/curr/fx/(\d+)/value$", ctx =>
+    server.RegisterHandler(@"^/hulp/track/curr/fx/(\d+)/value$", ctx =>
     {
       var slot = int.Parse(ctx.Match.Groups[1].Value);
       FxParameters[slot - 1].Percentage = ctx.Message.Atoms.FirstOrDefault().Double64Value;
@@ -109,12 +108,13 @@ public class OscService : BackgroundService
       TransportChanged?.Invoke();
     });
 
-    server.RegisterHandler("^/hulp/region$", ctx =>
+    server.RegisterHandler("^/hulpsong/curr$", ctx =>
     {
       var atoms = ctx.Message.Atoms;
       if (atoms.Count < 2) return;
-      Transport.RegionStart = atoms[0].Float32Value;
-      Transport.RegionEnd = atoms[1].Float32Value;
+      Transport.SongId = atoms[0].Int32Value;
+      Transport.RegionStart = atoms[1].Float32Value;
+      Transport.RegionEnd = atoms[2].Float32Value;
       TransportChanged?.Invoke();
     });
 

@@ -69,8 +69,8 @@ public class HulpMonitor
   {
     if (sender is not HulpState state) return;
     if (e.PropertyName is nameof(state.CurrentTrackName) or "")
-      _osc.WriteAsync(state.CurrentTrackName.ToOscMessage("/hulp/track/curr"));
-    _osc.WriteAsync(state.CurrentTrackName.ToOscMessage("/hulp/curr"));
+      _osc.WriteAsync(state.CurrentTrackName.ToOscMessage("/hulp/track/curr/name"));
+    _osc.WriteAsync(state.CurrentTrackName.ToOscMessage("/hulp/song/curr"));
     if (e.PropertyName is nameof(state.Beat) or "")
     {
       var text = $"{state.Beat.Beat}/{state.Beat.Length}";
@@ -92,7 +92,7 @@ public class HulpMonitor
   private void ParameterPropertyChangedCallback(object? sender, PropertyChangedEventArgs e)
   {
     if (sender is not ParameterSate state) return;
-    var baseAddress = $"/hulp/curr/fx/{state.Index + 1}";
+    var baseAddress = $"/hulp/track/curr/fx/{state.Index + 1}";
     if (e.PropertyName is nameof(state.Name) or "")
       _osc.WriteAsync(state.Name.ToOscMessage(baseAddress + "/name"));
     if (e.PropertyName is nameof(state.FormattedValue) or "")
