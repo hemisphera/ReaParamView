@@ -46,7 +46,7 @@ public static class Plugin
         sc.AddSingleton<LooperState>();
         sc.AddSingleton<ITransport, OscTransport>(services => services.GetRequiredService<OscTransport>());
       })
-      .ConfigureAppConfiguration(cfg => { cfg.AddJsonFile(settingsPath, optional: true, reloadOnChange: false); })
+      .ConfigureAppConfiguration(cfg => { cfg.AddJsonFile(settingsPath, optional: true, reloadOnChange: true); })
       .Build();
 
     try

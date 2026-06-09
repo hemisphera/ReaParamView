@@ -108,7 +108,7 @@ public class OscService : BackgroundService
       TransportChanged?.Invoke();
     });
 
-    server.RegisterHandler("^/hulpsong/curr$", ctx =>
+    server.RegisterHandler("^/hulp/song/curr$", ctx =>
     {
       var atoms = ctx.Message.Atoms;
       if (atoms.Count < 2) return;

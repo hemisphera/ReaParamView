@@ -70,7 +70,6 @@ public class HulpMonitor
       _osc.WriteAsync(state.CurrentTrackName.ToOscMessage("/hulp/track/curr/name"));
     }
 
-    _osc.WriteAsync(state.CurrentTrackName.ToOscMessage("/hulp/song/curr"));
     if (e.PropertyName is nameof(state.Beat) or "")
     {
       var text = $"{state.Beat.Beat}/{state.Beat.Length}";
