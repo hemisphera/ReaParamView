@@ -3,19 +3,26 @@ using System.Runtime.CompilerServices;
 
 namespace Hemisphera.Hulp.Plugin.Infrastructure;
 
-public class ObservedEntity : INotifyPropertyChanged
+public class ObservedEntity
 {
-  public event PropertyChangedEventHandler? PropertyChanged;
+  public event EventHandler<PropertyValueChangedEventArgs>? PropertyChanged;
 
-  protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+  protected int DisablePropertyNotifications { get; set; }
+
+
+  protected virtual void OnPropertyChanged(object? oldValue, object? newValue, [CallerMemberName] string? propertyName = null)
   {
-    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    PropertyChanged?.Invoke(this, new PropertyValueChangedEventArgs(propertyName, oldValue, newValue));
   }
 
   protected void SetFieldValue<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
   {
     if (EqualityComparer<T>.Default.Equals(field, value)) return;
+    var oldValue = field;
     field = value;
-    OnPropertyChanged(propertyName);
+    if (DisablePropertyNotifications == 0)
+    {
+      OnPropertyChanged(oldValue, field, propertyName);
+    }
   }
 }

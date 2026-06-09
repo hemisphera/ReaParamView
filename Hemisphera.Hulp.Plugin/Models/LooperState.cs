@@ -8,7 +8,7 @@ using ReaSharp.Models;
 
 namespace Hemisphera.Hulp.Plugin.Models;
 
-public class LooperState
+public class LooperState : ObservedEntity
 {
   private readonly ILogger<LooperState> _logger;
   private readonly IOptionsMonitor<LooperSettings> _settings;
@@ -29,8 +29,17 @@ public class LooperState
     }
   }
 
-  public ObservableProperty<TrackArea> ActiveArea { get; } = new();
-  public ObservableProperty<TrackArea> UpcomingArea { get; } = new();
+  public TrackArea? ActiveArea
+  {
+    get => field;
+    private set => SetFieldValue(ref field, value);
+  }
+
+  public TrackArea? UpcomingArea
+  {
+    get => field;
+    private set => SetFieldValue(ref field, value);
+  }
 
   public Song? CurrentSong { get; private set; }
 
@@ -45,8 +54,19 @@ public class LooperState
     _settings = settings;
     _monitor = monitor;
     _transport = new Transport(Project.Default);
-    UpcomingArea.ValueChangedCallback += UpcomingAreaChanged;
-    ActiveArea.ValueChangedCallback += ActiveAreaChanged;
+
+    PropertyChanged += (sender, args) =>
+    {
+      if (args.PropertyName == nameof(UpcomingArea))
+      {
+        _ = UpcomingAreaChanged();
+      }
+
+      if (args.PropertyName == nameof(ActiveArea))
+      {
+        _ = ActiveAreaChanged(args.OldValue as TrackArea, args.NewValue as TrackArea);
+      }
+    };
     _logger.LogDebug("LooperState loaded");
   }
 
@@ -58,6 +78,7 @@ public class LooperState
     _cts = new CancellationTokenSource();
     var token = _cts.Token;
 
+    // start the looper
     _ = Task.Run(async () =>
     {
       while (!token.IsCancellationRequested)
@@ -66,6 +87,7 @@ public class LooperState
         await Tick();
       }
     }, token);
+
     _transport.Play();
   }
 
@@ -80,8 +102,11 @@ public class LooperState
     CurrentSong?.Dispose();
     CurrentSong = null;
     _lastSelector = null;
-    await ActiveArea.Set(null, true);
-    await UpcomingArea.Set(null, true);
+
+    DisablePropertyNotifications += 1;
+    ActiveArea = null;
+    UpcomingArea = null;
+    DisablePropertyNotifications -= 1;
   }
 
   public async Task Initialize(TimeSpan? time = null)
@@ -165,21 +190,21 @@ public class LooperState
 
     var pos = _transport.PlayheadOrCursorPosition;
     HandleTrackSelector(pos);
-    await ActiveArea.Set(CurrentSong.RecordingAreas.FirstOrDefault(a => pos.IsWithin(a.Item)));
-    await UpcomingArea.Set(CurrentSong.RecordingAreas.FirstOrDefault(a => (pos + LookAhead).IsWithin(a.Item)));
+    ActiveArea = CurrentSong.RecordingAreas.FirstOrDefault(a => pos.IsWithin(a.Item));
+    UpcomingArea = CurrentSong.RecordingAreas.FirstOrDefault(a => (pos + LookAhead).IsWithin(a.Item));
   }
 
 
-  private async Task UpcomingAreaChanged(TrackArea? oldArea, TrackArea? newArea)
+  private async Task UpcomingAreaChanged()
   {
     // do nothing unless we're playing
     if (!_transport.IsPlaying) return;
 
-    _logger.LogDebug("Upcoming area changed: {newArea}", newArea);
+    _logger.LogDebug("Upcoming area changed: {newArea}", UpcomingArea);
 
-    if (newArea?.State == AreaState.Clean)
+    if (UpcomingArea?.State == AreaState.Clean)
     {
-      await newArea.BeginRecording();
+      await UpcomingArea.BeginRecording();
       if (!_transport.IsRecording)
       {
         _transport.ToggleRecordAtNextBeat();
@@ -187,7 +212,7 @@ public class LooperState
     }
 
     // if recording and no more upcoming item, stop recording.
-    if (newArea == null && _transport.IsRecording)
+    if (UpcomingArea == null && _transport.IsRecording)
     {
       _transport.ToggleRecordAtNextBeat();
     }
