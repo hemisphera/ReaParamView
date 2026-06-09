@@ -118,6 +118,12 @@ public class OscService : BackgroundService
       TransportChanged?.Invoke();
     });
 
+    server.RegisterHandler("^/hulp/song/curr/name$", ctx =>
+    {
+      Transport.SongName = ctx.Message.Atoms.FirstOrDefault().StringValue ?? string.Empty;
+      TransportChanged?.Invoke();
+    });
+
     server.RegisterHandler(@"^/hulp/track/(\d+)/name$", ctx =>
     {
       var index = int.Parse(ctx.Match.Groups[1].Value); // 1-based

@@ -1,9 +1,14 @@
 @page "/"
 @rendermode InteractiveServer
+@inject Hemisphera.Hulp.WebApp.Services.OscService OscService
+@implements IDisposable
 
 <PageTitle>ReaParamView</PageTitle>
 
 <div class="dashboard">
+    <div class="song-name">
+        @OscService.Transport.SongName
+    </div>
     <div class="dashboard-tracks">
         <TrackView />
     </div>
@@ -17,3 +22,20 @@
         <Transport />
     </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        OscService.TransportChanged += HandleTransportChanged;
+    }
+
+    private void HandleTransportChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        OscService.TransportChanged -= HandleTransportChanged;
+    }
+}
