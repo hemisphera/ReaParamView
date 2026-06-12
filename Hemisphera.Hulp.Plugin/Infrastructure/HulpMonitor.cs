@@ -254,23 +254,33 @@ public class HulpMonitor
   private IEnumerable<HulpEvent> CollectEvents()
   {
     var index = 0;
-    foreach (var area in _currentSong?.RecordingAreas ?? [])
+    foreach (var item in _currentSong?.RecordingAreas ?? [])
     {
       yield return new HulpEvent
       {
         Index = index++,
-        Text = $"Record: {area.Name} {area.Item.Track.Name}",
-        Time = area.Item.Start.TotalSeconds
+        Text = $"Record: {item.Name} {item.Item.Track.Name}",
+        Time = item.Item.Start.TotalSeconds
       };
     }
 
-    foreach (var sel in _currentSong?.Selectors ?? [])
+    foreach (var item in _currentSong?.Selectors ?? [])
     {
       yield return new HulpEvent
       {
         Index = index++,
-        Text = $"Select: {sel.Track.Name}",
-        Time = sel.Start.TotalSeconds
+        Text = $"Select: {item.Track.Name}",
+        Time = item.Start.TotalSeconds
+      };
+    }
+
+    foreach (var item in _currentSong?.Notes ?? [])
+    {
+      yield return new HulpEvent
+      {
+        Index = index++,
+        Text = $"Note: {item.Text}",
+        Time = item.Position.TotalSeconds
       };
     }
   }

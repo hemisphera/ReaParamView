@@ -19,9 +19,9 @@ public class Commands
   {
     var state = arg.GetRequiredService<LooperState>();
     var logger = arg.GetRequiredService<ILogger<LooperState>>();
-    logger.LogInformation("Debug");
+    logger.LogDebug("Debug");
     state.CurrentSong?.Dump(logger);
-    logger.LogInformation("Context: {context}", actionContext);
+    logger.LogDebug("Context: {context}", actionContext);
     return Task.CompletedTask;
   }
 
@@ -34,7 +34,6 @@ public class Commands
   public static async Task SelectSong(IServiceProvider arg, ActionContext actionContext)
   {
     var logger = arg.GetRequiredService<ILogger<LooperState>>();
-    logger.LogInformation("Context {song}...", actionContext);
     var state = arg.GetRequiredService<LooperState>();
     var songs = state.EnumerateSongs();
     if (songs.Count == 0) return;
@@ -44,7 +43,7 @@ public class Commands
 
     var delta = actionContext.Val <= 63 ? 1 : -1;
     var newIdx = Math.Clamp(idx + delta, 0, songs.Count - 1);
-    logger.LogInformation("Selecting {song}...", newIdx);
+    logger.LogDebug("Selecting {song}...", newIdx);
     await state.Initialize(songs[newIdx].Region.Start);
   }
 

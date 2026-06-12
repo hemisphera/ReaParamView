@@ -2,6 +2,7 @@ using Hsp.Osc;
 using Microsoft.Extensions.Logging;
 using ReaSharp;
 using ReaSharp.Models;
+using ReaSharp.RppXml.Nodes;
 
 namespace Hemisphera.Hulp.Plugin.Models;
 
@@ -13,6 +14,7 @@ public sealed class Song : IDisposable
   public required Track[] Tracks { get; init; }
   public List<TrackArea> RecordingAreas { get; set; } = [];
   public List<TrackSelector> Selectors { get; set; } = [];
+  public List<SongNote> Notes { get; set; } = [];
 
 
   public static Song? FromRegion(Region region, string containerName)
@@ -49,10 +51,15 @@ public sealed class Song : IDisposable
 
   public void Initialize(TimeSpan pos)
   {
+    RecordingAreas.Clear();
+    Selectors.Clear();
+    Notes.Clear();
+
     foreach (var track in Tracks)
     {
-      RecordingAreas.AddRange(TrackArea.LoadRecordingAreas(track, this));
+      LoadRecordingAreasForTrack(track);
       LoadTrackSelectorsForTrack(track);
+      LoadNotesForTrack(track);
     }
 
     foreach (var area in RecordingAreas)
@@ -67,11 +74,29 @@ public sealed class Song : IDisposable
     Reaper.UpdateArrange.Invoke();
   }
 
+  private void LoadNotesForTrack(Track track)
+  {
+    var items = track.EnumerateMediaItems()
+      .Where(i => i.GetActiveTake() == null)
+      .ToList();
+    foreach (var item in items)
+    {
+      var notes = item.GetStateChunk()?.FindChild<RppNotesNode>()?.Text;
+      if (string.IsNullOrEmpty(notes)) continue;
+      Notes.Add(new SongNote { Text = notes, Position = item.Start });
+    }
+  }
+
+  private void LoadRecordingAreasForTrack(Track track)
+  {
+    RecordingAreas.AddRange(TrackArea.LoadRecordingAreas(track, this));
+  }
 
   private void LoadTrackSelectorsForTrack(Track track)
   {
     var selectors = track.EnumerateMediaItems()
-      .Where(i => i.GetActiveTake()?.Name?.Equals("select", StringComparison.OrdinalIgnoreCase) == true).ToList();
+      .Where(i => i.GetActiveTake()?.Name?.Equals("select", StringComparison.OrdinalIgnoreCase) == true)
+      .ToList();
     foreach (var selector in selectors)
     {
       Selectors.Add(new TrackSelector { Start = selector.Start, Track = track });

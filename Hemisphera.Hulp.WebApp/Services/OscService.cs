@@ -41,7 +41,20 @@ public class OscService : BackgroundService
   {
     lock (_eventsLock)
     {
-      return _events.Where(e => e.Visible).OrderBy(e => e.Position).ToList();
+      var currPos = Transport.Position;
+      var sortedEvents = _events
+        .Where(ev => ev.Position > currPos)
+        .OrderBy(ev => ev.Position)
+        .ToList();
+      for (var i = 0; i < sortedEvents.Count; i++)
+      {
+        if (i == 0)
+          sortedEvents[i].UpdateCountdown(currPos);
+        else
+          sortedEvents[i].Countdown = null;
+      }
+
+      return sortedEvents;
     }
   }
 
@@ -104,7 +117,7 @@ public class OscService : BackgroundService
     server.RegisterHandler("^/hulp/qnpos$", ctx =>
     {
       Transport.Position = ctx.Message.Atoms.FirstOrDefault().Int32Value;
-      UpdateEvents(Transport.Position);
+      UpdateEvents();
       TransportChanged?.Invoke();
     });
 
@@ -191,22 +204,8 @@ public class OscService : BackgroundService
     }
   }
 
-  private void UpdateEvents(double currPos)
+  private void UpdateEvents()
   {
-    lock (_eventsLock)
-    {
-      var counter = 0;
-      foreach (var item in _events.OrderBy(e => e.Position))
-      {
-        var isVisible = item.Position > currPos;
-        item.Index = isVisible ? counter++ : 0;
-        item.Visible = isVisible;
-        item.Countdown = null;
-      }
-
-      _events.FirstOrDefault(e => e.Visible)?.UpdateCountdown(currPos);
-    }
-
     UpcomingEventsChanged?.Invoke();
   }
 }
