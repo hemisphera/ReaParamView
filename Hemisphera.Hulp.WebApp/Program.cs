@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http.Features;
@@ -10,6 +11,7 @@ var options = new WebApplicationOptions
   Args = args,
   ContentRootPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
 };
+var openBrowser = args.Contains("--open");
 var builder = WebApplication.CreateBuilder(options);
 
 // Add services to the container.
@@ -66,6 +68,24 @@ else
   {
     logger.LogInformation("WebApp is running at: {Address}", address);
   }
+}
+
+if (openBrowser && addressesFeature.Addresses.Count > 0)
+{
+  var urlToOpen = addressesFeature.Addresses.First();
+  
+  // Try to use the local IP if available for better accessibility
+  if (localIp != null && Uri.TryCreate(urlToOpen, UriKind.Absolute, out var uri))
+  {
+    urlToOpen = $"http://{localIp}:{uri.Port}";
+  }
+
+  logger.LogInformation("Opening browser at: {URL}", urlToOpen);
+  Process.Start(new ProcessStartInfo
+  {
+    FileName = urlToOpen,
+    UseShellExecute = true
+  });
 }
 
 await app.WaitForShutdownAsync();
