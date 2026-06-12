@@ -16,6 +16,7 @@
 }
 
 .ev-item {
+    position: relative;
     padding: 0.55rem 0.65rem;
     border-radius: 6px;
     background: rgba(255,255,255,0.03);
@@ -26,6 +27,7 @@
     overflow: hidden;
     flex-shrink: 0;
     transition: background 0.2s, border-color 0.2s;
+    z-index: 0;
 }
 
 .ev-item--next {
@@ -34,6 +36,8 @@
 }
 
 .ev-item-text {
+    position: relative;
+    z-index: 1;
     font-size: 0.78rem;
     font-weight: 600;
     color: #e2e8f0;
@@ -47,6 +51,8 @@
 }
 
 .ev-item-meta {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -76,4 +82,21 @@
 
 .ev-item--next .ev-item-countdown {
     color: #cbd5e1;
+}
+
+.ev-item-gauge {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    height: 100%;
+    background: rgba(0, 212, 170, 0.5);
+    z-index: -1;
+    transition: width 0.2s ease;
+    pointer-events: none;
+}
+
+.ev-item-time {
+    position: relative;
+    z-index: 1;
 }

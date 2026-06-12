@@ -11,7 +11,7 @@
     <div class="tp-countdown">
         @if (OscService.Transport.RegionEnd > 0)
         {
-            <span class="tp-countdown-value">@FormatTime(OscService.Transport.RemainingSeconds)</span>
+            <span class="tp-countdown-value">@FormatTime(OscService.Transport.Remaining)</span>
             <span class="tp-countdown-label">remaining</span>
         }
         else
@@ -38,10 +38,31 @@
     private void Refresh()
     {
         var t = OscService.Transport;
-        if (t.IsRecording)      { _statusClass = "recording"; _statusLabel = "Recording"; _statusSymbol = "●"; }
-        else if (t.IsPlaying)   { _statusClass = "playing";   _statusLabel = "Playing";   _statusSymbol = "▶"; }
-        else if (t.IsPaused)    { _statusClass = "paused";    _statusLabel = "Paused";    _statusSymbol = "⏸"; }
-        else                    { _statusClass = "stopped";   _statusLabel = "Stopped";   _statusSymbol = "■"; }
+        if (t.IsRecording)
+        {
+            _statusClass = "recording";
+            _statusLabel = "Recording";
+            _statusSymbol = "●";
+        }
+        else if (t.IsPlaying)
+        {
+            _statusClass = "playing";
+            _statusLabel = "Playing";
+            _statusSymbol = "▶";
+        }
+        else if (t.IsPaused)
+        {
+            _statusClass = "paused";
+            _statusLabel = "Paused";
+            _statusSymbol = "⏸";
+        }
+        else
+        {
+            _statusClass = "stopped";
+            _statusLabel = "Stopped";
+            _statusSymbol = "■";
+        }
+
         InvokeAsync(StateHasChanged);
     }
 
@@ -58,4 +79,5 @@
         OscService.TransportChanged -= Refresh;
         _timer.Dispose();
     }
+
 }

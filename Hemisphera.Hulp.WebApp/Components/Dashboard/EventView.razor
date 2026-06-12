@@ -1,4 +1,5 @@
 @inject OscService OscService
+@using System.Globalization
 @implements IDisposable
 
 <div class="ev-wrapper">
@@ -12,19 +13,29 @@
     }
     else
     {
+        var currPos = OscService.Transport.Position;
         @for (var i = 0; i < events.Count; i++)
         {
-            var ev = events[i];
-            var remaining = ev.Position - OscService.Transport.Position;
             var isNext = i == 0;
+            var ev = events[i];
+            var gaugeWidth = 0;
+            var displayValue = "";
+            if (isNext)
+            {
+                var remaining = Math.Round(ev.Position - currPos, 2);
+                displayValue = remaining > 16 ? "+++" : remaining.ToString(CultureInfo.InvariantCulture);
+                gaugeWidth = (int)(remaining > 16 ? 100 : Math.Max(0, remaining / 16.0 * 100));
+            }
+
             <div class="ev-item @(isNext ? "ev-item--next" : "")">
+                <div class="ev-item-gauge" style="width: @(gaugeWidth)%"></div>
                 <div class="ev-item-text">@ev.Text</div>
-                <div class="ev-item-meta">
-                    @if (ev.Countdown != null)
-                    {
-                        <div class="ev-item-time">@remaining</div>
-                    }
-                </div>
+                @if (isNext)
+                {
+                    <div class="ev-item-meta">
+                        <span class="ev-item-time">@displayValue</span>
+                    </div>
+                }
             </div>
         }
     }

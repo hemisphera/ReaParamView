@@ -11,5 +11,5 @@ public class TransportState
   public int SongId { get; set; }
   public string SongName { get; set; } = string.Empty;
 
-  public double RemainingSeconds => RegionEnd > 0 ? Math.Max(0, RegionEnd - Position) : 0;
+  public double Remaining => RegionEnd > 0 ? Math.Max(0, RegionEnd - Position) : 0;
 }

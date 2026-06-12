@@ -46,14 +46,6 @@ public class OscService : BackgroundService
         .Where(ev => ev.Position > currPos)
         .OrderBy(ev => ev.Position)
         .ToList();
-      for (var i = 0; i < sortedEvents.Count; i++)
-      {
-        if (i == 0)
-          sortedEvents[i].UpdateCountdown(currPos);
-        else
-          sortedEvents[i].Countdown = null;
-      }
-
       return sortedEvents;
     }
   }
