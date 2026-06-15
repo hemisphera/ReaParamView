@@ -40,16 +40,20 @@ public class MonitoredParameterFactory
         var plink = envelope.GetPropertyValue("PLINK", 1)?.AsString().Split(':') ?? [];
         var linkSourceFxIndex = plink.Length > 0 ? (int?)int.Parse(plink[0]) : null;
         _logger.LogDebug("Source FX index: {linkSourceFxIndex}", linkSourceFxIndex);
-        var index = envelope.GetPropertyValue("PLINK", 2)?.AsInt32() - 2;
+        var index = envelope.GetPropertyValue("PLINK", 2)?.AsInt32();
         _logger.LogDebug("Target FX index: {index}", index);
         if (index == null) return null;
         if (linkSourceFxIndex != _relativatorIndex) return null;
-        return new MonitoredParameter(
+
+        var source = new FxParameterIndices(
+          _track,
+          _relativatorIndex.Value,
+          index.Value);
+        var target = new FxParameterIndices(
           _track,
           _allFx.IndexOf(envelope.Parent),
-          int.Parse(envelope.DefaultValues[0].AsString().Split(':').First()),
-          index.Value
-        );
+          int.Parse(envelope.DefaultValues[0].AsString().Split(':').First()));
+        return new MonitoredParameter(source, target);
       }).OfType<MonitoredParameter>()
       .OrderBy(p => p.Index)
       .ToArray();

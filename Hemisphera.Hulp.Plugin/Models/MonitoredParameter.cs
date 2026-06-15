@@ -1,15 +1,11 @@
-using ReaSharp.Models;
-using ReaSharp.RppXml;
-
 namespace Hemisphera.Hulp.Plugin.Models;
 
 public class MonitoredParameter
 {
-  public Track Track { get; }
-  public int TargetFxParameterIndex { get; }
-  public int TargetFxIndex { get; }
+  public FxParameterIndices Source { get; }
+  public FxParameterIndices Target { get; }
   public string Name { get; }
-  public int Index { get; }
+  public int Index => Source.ParameterIndex - 2;
   public double MaxValue { get; }
   public double MinValue { get; }
   public double Value { get; private set; }
@@ -17,15 +13,12 @@ public class MonitoredParameter
   public string FormattedValue { get; private set; } = string.Empty;
 
 
-  public MonitoredParameter(Track track, int fxIndex, int fxParameterIndex, int index)
+  public MonitoredParameter(FxParameterIndices source, FxParameterIndices target)
   {
-    Track = track;
-    TargetFxIndex = fxIndex;
-    TargetFxParameterIndex = fxParameterIndex;
-    Index = index;
+    Target = target;
+    Source = source;
 
-    var parameter = GetFxParameter();
-
+    var parameter = Target.GetParameter();
     Name = (parameter.Name ?? string.Empty).Split('/').First().Trim();
     MinValue = parameter.Minimum;
     MaxValue = parameter.Maximum;
@@ -35,21 +28,16 @@ public class MonitoredParameter
 
   public void UpdateValue()
   {
-    var parameter = GetFxParameter();
-    var parameterValue = parameter.GetValueNormalized();
+    var parameter = Target.GetParameter();
+    var parameterValue = parameter.NormalizedValue;
     Value = parameterValue;
     FormattedValue = parameter.GetFormattedValue();
     Percentage = Value;
   }
 
-  public FxInstanceParameter GetFxParameter()
-  {
-    var fx = Track.GetFx(TargetFxIndex);
-    return fx.GetParameter(TargetFxParameterIndex);
-  }
 
   public override string ToString()
   {
-    return $"{Name} (slot {Index + 1} => FX {TargetFxIndex}/{TargetFxParameterIndex} [{MinValue} - {MaxValue}]";
+    return $"{Name} (slot {Index + 1} => FX {Target.FxIndex}/{Target.ParameterIndex} [{MinValue} - {MaxValue}]";
   }
 }

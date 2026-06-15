@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Threading.Channels;
+using Hemisphera.Hulp.Plugin.Devices;
 using Hemisphera.Hulp.Plugin.Infrastructure;
 using Hemisphera.Hulp.Plugin.Models;
 using Hemisphera.Hulp.Plugin.Settings;
@@ -39,11 +40,13 @@ public static class Plugin
         sc.AddSingleton<ChannelWriter<IMessage>>(sp => sp.GetRequiredService<Channel<IMessage>>().Writer);
         sc.AddSingleton<ChannelReader<IMessage>>(sp => sp.GetRequiredService<Channel<IMessage>>().Reader);
         sc.AddSingleton<IOscWriter, ChannelOscWriter>();
+        sc.AddSingleton<IDevice, Apc64Device>();
         sc.Configure<LooperSettings>(context.Configuration.GetSection(nameof(LooperSettings)));
         sc.AddSingleton<ICommandRegistry, DefaultCommandRegistry>();
         sc.AddSingleton<HulpMonitor>();
         sc.AddSingleton<OscTransport>();
         sc.AddSingleton<LooperState>();
+        sc.AddSingleton<MidiListener>();
         sc.AddSingleton<ITransport, OscTransport>(services => services.GetRequiredService<OscTransport>());
       })
       .ConfigureAppConfiguration(cfg => { cfg.AddJsonFile(settingsPath, optional: true, reloadOnChange: true); })
@@ -65,6 +68,9 @@ public static class Plugin
       _ = monitor.Start();
       var transport = state.Services.GetRequiredService<ITransport>();
       _ = transport.StartAsync(CancellationToken.None);
+
+      var device = state.Services.GetRequiredService<IDevice>();
+      device.Initialize();
 
       return 1;
     }

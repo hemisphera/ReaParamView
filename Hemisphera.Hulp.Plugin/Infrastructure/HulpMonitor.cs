@@ -1,3 +1,4 @@
+using Hemisphera.Hulp.Plugin.Devices;
 using Hemisphera.Hulp.Plugin.Models;
 using Hemisphera.Hulp.Plugin.StateModels;
 using Hsp.Osc;
@@ -12,6 +13,7 @@ public class HulpMonitor
 {
   private readonly ILogger<HulpMonitor> _logger;
   private readonly IOscWriter _osc;
+  private readonly IDevice _controlDevice;
 
   private readonly HulpState _state;
   private readonly ParameterSate[] _parameters;
@@ -28,10 +30,12 @@ public class HulpMonitor
   private Transport? _transport;
 
 
-  public HulpMonitor(ILogger<HulpMonitor> logger, IOscWriter osc)
+  public HulpMonitor(ILogger<HulpMonitor> logger, IOscWriter osc, IDevice controlDevice)
   {
     _logger = logger;
     _osc = osc;
+    _controlDevice = controlDevice;
+    _controlDevice.ParameterChanged += DeviceParameterChangedHandler;
 
     _state = new HulpState();
     _state.PropertyChanged += StatePropertyChangedCallback;
@@ -59,6 +63,14 @@ public class HulpMonitor
       item.PropertyChanged += EventPropertyChangedCallback;
       return item;
     }).ToArray();
+  }
+
+  private void DeviceParameterChangedHandler(object? sender, ParamterChangedEventArgs e)
+  {
+    var mp = _monitoredParameters.FirstOrDefault(mp => mp.Index == e.ParameterIndex);
+    if (mp is null) return;
+    var fxp = mp.Source.GetParameter();
+    fxp.NormalizedValue = e.Value / 127.0;
   }
 
 
@@ -99,7 +111,10 @@ public class HulpMonitor
     if (e.PropertyName is nameof(state.FormattedValue) or "")
       _osc.WriteAsync(state.FormattedValue.ToOscMessage(baseAddress + "/value/str"));
     if (e.PropertyName is nameof(state.Percentage) or "")
+    {
       _osc.WriteAsync(state.Percentage.ToOscMessage(baseAddress + "/value"));
+      _controlDevice.SetParameter(state.Index, (int)(state.Percentage * 127));
+    }
   }
 
   private void TrackPropertyChangedCallback(object? sender, PropertyValueChangedEventArgs e)
@@ -205,6 +220,7 @@ public class HulpMonitor
 
     var paramFactory = new MonitoredParameterFactory(_currentTrack, _logger);
     _monitoredParameters.AddRange(paramFactory.Build());
+
     if (_logger.IsEnabled(LogLevel.Debug))
     {
       _logger.LogDebug("Track '{track}' selected", _currentTrack.Name);

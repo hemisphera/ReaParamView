@@ -22,4 +22,9 @@ public class LooperSettings
   /// The name of the container where song tracks are stored.
   /// </summary>
   public string ContainerTrackName { get; set; } = "Songs";
+
+  /// <summary>
+  /// The name of the container where song tracks are stored.
+  /// </summary>
+  public string? MidiOutputDeviceName { get; set; } = "MIDIOUT4 (APC)";
 }
