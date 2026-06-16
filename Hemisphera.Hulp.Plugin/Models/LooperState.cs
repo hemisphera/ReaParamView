@@ -253,4 +253,17 @@ public class LooperState : ObservedEntity
     _logger.LogDebug("Selector activated: {selector}", selector);
     selector.Track.SelectExclusive();
   }
+
+  public async Task ChangeSong(int delta)
+  {
+    var songs = EnumerateSongs();
+    if (songs.Count == 0) return;
+
+    var currSongRegionId = CurrentSong?.Region.Id ?? -1;
+    var idx = songs.FindIndex(a => a.Region.Id == currSongRegionId);
+
+    var newIdx = Math.Clamp(idx + delta, 0, songs.Count - 1);
+    _logger.LogDebug("Selecting {song}...", newIdx);
+    await Initialize(songs[newIdx].Region.Start);
+  }
 }

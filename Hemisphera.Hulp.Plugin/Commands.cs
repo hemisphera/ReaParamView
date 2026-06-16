@@ -31,20 +31,23 @@ public class Commands
     await state.FocusRegion();
   }
 
+  public static async Task SelectNextSong(IServiceProvider arg, ActionContext actionContext)
+  {
+    var state = arg.GetRequiredService<LooperState>();
+    await state.ChangeSong(1);
+  }
+
+  public static async Task SelectPreviousSong(IServiceProvider arg, ActionContext actionContext)
+  {
+    var state = arg.GetRequiredService<LooperState>();
+    await state.ChangeSong(-1);
+  }
+
   public static async Task SelectSong(IServiceProvider arg, ActionContext actionContext)
   {
-    var logger = arg.GetRequiredService<ILogger<LooperState>>();
     var state = arg.GetRequiredService<LooperState>();
-    var songs = state.EnumerateSongs();
-    if (songs.Count == 0) return;
-
-    var currSongRegionId = state.CurrentSong?.Region?.Id ?? -1;
-    var idx = songs.FindIndex(a => a.Region.Id == currSongRegionId);
-
     var delta = actionContext.Val <= 63 ? 1 : -1;
-    var newIdx = Math.Clamp(idx + delta, 0, songs.Count - 1);
-    logger.LogDebug("Selecting {song}...", newIdx);
-    await state.Initialize(songs[newIdx].Region.Start);
+    await state.ChangeSong(delta);
   }
 
   public static async Task Initialize(IServiceProvider provider, ActionContext context)
