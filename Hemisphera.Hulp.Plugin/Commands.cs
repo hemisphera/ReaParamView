@@ -28,7 +28,7 @@ public class Commands
   public static async Task FocusCurrentSong(IServiceProvider arg, ActionContext actionContext)
   {
     var state = arg.GetRequiredService<LooperState>();
-    await state.FocusRegion();
+    await state.FocusSong();
   }
 
   public static async Task SelectNextSong(IServiceProvider arg, ActionContext actionContext)

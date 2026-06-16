@@ -41,12 +41,18 @@ public sealed class Song : IDisposable
 
   public void SetActive(bool isActive)
   {
+    SetActive(RootTrack, isActive);
     foreach (var track in Tracks)
     {
-      track.Mute = !isActive;
-      track.ShowInTcp = isActive;
-      track.FxBypassed = !isActive;
+      SetActive(track, isActive);
     }
+  }
+
+  private static void SetActive(Track track, bool isActive)
+  {
+    track.Mute = !isActive;
+    track.ShowInTcp = isActive;
+    track.FxBypassed = !isActive;
   }
 
   public void Initialize(TimeSpan pos)

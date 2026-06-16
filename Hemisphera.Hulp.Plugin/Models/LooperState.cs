@@ -155,10 +155,10 @@ public class LooperState : ObservedEntity
     return songs;
   }
 
-  public async Task FocusRegion()
+  public async Task FocusSong(TimeSpan? time = null)
   {
     _logger.LogDebug("Focus region");
-    await Initialize();
+    await Initialize(time);
     if (CurrentSong == null) return;
     _transport.Project.SetSelection(CurrentSong.Region);
 
@@ -264,6 +264,6 @@ public class LooperState : ObservedEntity
 
     var newIdx = Math.Clamp(idx + delta, 0, songs.Count - 1);
     _logger.LogDebug("Selecting {song}...", newIdx);
-    await Initialize(songs[newIdx].Region.Start);
+    await FocusSong(songs[newIdx].Region.Start);
   }
 }
