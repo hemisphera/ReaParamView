@@ -215,11 +215,13 @@ public class HulpMonitor
     if (_currentTrack == null)
     {
       _logger.LogDebug("No track selected");
+      _controlDevice.ChangeTrack();
       return;
     }
 
     var paramFactory = new MonitoredParameterFactory(_currentTrack, _logger);
     _monitoredParameters.AddRange(paramFactory.Build());
+    _controlDevice.ChangeTrack();
 
     if (_logger.IsEnabled(LogLevel.Debug))
     {

@@ -2,7 +2,7 @@
 
 public interface IDevice
 {
-  void Initialize();
+  void ChangeTrack();
   void SetParameter(int index, int value);
   event EventHandler<ParamterChangedEventArgs>? ParameterChanged;
 }

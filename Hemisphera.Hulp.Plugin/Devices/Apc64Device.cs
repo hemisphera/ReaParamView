@@ -14,9 +14,11 @@ public class Apc64Device : IDevice
 
   private readonly IOptionsMonitor<LooperSettings> _settings;
   private readonly ILogger<Apc64Device> _logger;
-  private int _deviceId;
-  private string? _deviceName;
+  private MidiDevice? _inputDevice;
+  private MidiDevice? _outputDevice;
   private readonly MidiListener _midiListener;
+  private bool _inputDeviceLoaded;
+  private bool _outputDeviceLoaded;
 
 
   public Apc64Device(IOptionsMonitor<LooperSettings> settings, ILogger<Apc64Device> logger, MidiListener midiListener)
@@ -29,8 +31,18 @@ public class Apc64Device : IDevice
 
   private void MidiListenerOnMidiReceived(object? sender, MidiEvent e)
   {
-    _logger.LogDebug("Received event {ev}", e);
-    if (e.DeviceIndex != _deviceId) return;
+    if (!_inputDeviceLoaded)
+    {
+      var deviceName = _settings.Get(null).MidiInputDeviceName;
+      _inputDevice = MidiDevice.EnumerateInputs().FirstOrDefault(d => d.Name == deviceName);
+      if (_inputDevice == null) _logger.LogWarning("No MIDI input device found with name '{deviceName}'", deviceName);
+      _logger.LogDebug("Using input device {name} id {id}", _outputDevice?.Name, _inputDevice?.Id ?? -1);
+      _inputDeviceLoaded = true;
+    }
+
+    if (_inputDevice == null) return;
+    if (e.DeviceIndex != _inputDevice.Id) return;
+
     if ((e.Status & 0x0F) != MidiChannel - 1) return; // MIDI channel 2
     if (e.Status >> 4 != 11) return; // CC
     if (e.Data1 is < FirstCcNumber or > FirstCcNumber + ParameterCount) return;
@@ -40,7 +52,7 @@ public class Apc64Device : IDevice
   }
 
 
-  public void Initialize()
+  public void ChangeTrack()
   {
     for (var i = 0; i < ParameterCount; i++)
     {
@@ -50,21 +62,21 @@ public class Apc64Device : IDevice
 
   public void SetParameter(int index, int value)
   {
-    var deviceName = _settings.Get(null).MidiOutputDeviceName;
-    if (deviceName == null) return;
-
-    if (deviceName != _deviceName)
+    if (!_outputDeviceLoaded)
     {
-      _deviceName = deviceName;
-      _deviceId = MidiDevice.EnumerateOutput().FirstOrDefault(d => d.Name == _deviceName)?.Id ?? -1;
-      _logger.LogDebug("Using device {name} id {id}", _deviceName, _deviceId);
+      var deviceName = _settings.Get(null).MidiOutputDeviceName;
+      _outputDevice = MidiDevice.EnumerateOutput().FirstOrDefault(d => d.Name == deviceName);
+      if (_outputDevice == null) _logger.LogWarning("No MIDI output device found with name '{deviceName}'", deviceName);
+      _logger.LogDebug("Using output device {name} id {id}", _outputDevice?.Name, _outputDevice?.Id ?? -1);
+      _outputDeviceLoaded = true;
     }
 
-    if (_deviceId < 0) return;
+    if (_outputDevice == null) return;
+
     var ccNo = index + FirstCcNumber;
     _logger.LogDebug("Setting CC {ccNo} id {value}", ccNo, value);
     Reaper.StuffMIDIMessage.Invoke(
-      _deviceId + 16,
+      _outputDevice.Id + 16,
       0xb0 + (MidiChannel - 1),
       ccNo,
       value);

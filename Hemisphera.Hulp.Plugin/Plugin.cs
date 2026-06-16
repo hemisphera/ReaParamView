@@ -69,9 +69,6 @@ public static class Plugin
       var transport = state.Services.GetRequiredService<ITransport>();
       _ = transport.StartAsync(CancellationToken.None);
 
-      var device = state.Services.GetRequiredService<IDevice>();
-      device.Initialize();
-
       return 1;
     }
     catch (Exception ex)
