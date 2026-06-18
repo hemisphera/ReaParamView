@@ -40,7 +40,9 @@ public static class Plugin
         sc.AddSingleton<ChannelWriter<IMessage>>(sp => sp.GetRequiredService<Channel<IMessage>>().Writer);
         sc.AddSingleton<ChannelReader<IMessage>>(sp => sp.GetRequiredService<Channel<IMessage>>().Reader);
         sc.AddSingleton<IOscWriter, ChannelOscWriter>();
+
         sc.AddSingleton<IDevice, Apc64Device>();
+
         sc.Configure<LooperSettings>(context.Configuration.GetSection(nameof(LooperSettings)));
         sc.AddSingleton<ICommandRegistry, DefaultCommandRegistry>();
         sc.AddSingleton<HulpMonitor>();
@@ -65,6 +67,7 @@ public static class Plugin
       commands.Register("HULP_RESTART", "Hulp: Restart Engine", Commands.RestartEngine);
       commands.Register("HULP_SELECT_NEXT", "Hulp: Select Next Song", Commands.SelectNextSong);
       commands.Register("HULP_SELECT_PREVIOUS", "Hulp: Select Previous Song", Commands.SelectPreviousSong);
+      commands.Register("HULP_RECONNECT_DEVICES", "Hulp: Reconnect devices", Commands.Reconnect);
 
       var monitor = state.Services.GetRequiredService<HulpMonitor>();
       _ = monitor.Start();

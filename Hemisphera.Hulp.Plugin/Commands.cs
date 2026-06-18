@@ -1,3 +1,4 @@
+using Hemisphera.Hulp.Plugin.Devices;
 using Hemisphera.Hulp.Plugin.Infrastructure;
 using Hemisphera.Hulp.Plugin.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,5 +63,16 @@ public class Commands
     var transport = PluginState.Instance.Services.GetRequiredService<ITransport>();
     await transport.StopAsync(ct);
     await transport.StartAsync(ct);
+  }
+
+  public static Task Reconnect(IServiceProvider sp, ActionContext arg2)
+  {
+    var devices = sp.GetServices<IDevice>();
+    foreach (var device in devices)
+    {
+      device.Connect();
+    }
+
+    return Task.CompletedTask;
   }
 }

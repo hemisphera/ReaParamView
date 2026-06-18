@@ -1,8 +1,11 @@
-﻿namespace Hemisphera.Hulp.Plugin.Devices;
+﻿using ReaSharp.Models;
+
+namespace Hemisphera.Hulp.Plugin.Devices;
 
 public interface IDevice
 {
-  void ChangeTrack();
+  void ChangeTrack(Track? currentTrack);
   void SetParameter(int index, int value);
-  event EventHandler<ParamterChangedEventArgs>? ParameterChanged;
+  event EventHandler<ParameterChangedEventArgs>? ParameterChanged;
+  void Connect();
 }

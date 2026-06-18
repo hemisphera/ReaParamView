@@ -13,7 +13,7 @@ public class HulpMonitor
 {
   private readonly ILogger<HulpMonitor> _logger;
   private readonly IOscWriter _osc;
-  private readonly IDevice _controlDevice;
+  private readonly IDevice[] _devices;
 
   private readonly HulpState _state;
   private readonly ParameterSate[] _parameters;
@@ -30,12 +30,16 @@ public class HulpMonitor
   private Transport? _transport;
 
 
-  public HulpMonitor(ILogger<HulpMonitor> logger, IOscWriter osc, IDevice controlDevice)
+  public HulpMonitor(ILogger<HulpMonitor> logger, IOscWriter osc, IEnumerable<IDevice> devices)
   {
     _logger = logger;
     _osc = osc;
-    _controlDevice = controlDevice;
-    _controlDevice.ParameterChanged += DeviceParameterChangedHandler;
+    _devices = devices.ToArray();
+    foreach (var device in _devices)
+    {
+      device.Connect();
+      device.ParameterChanged += DeviceParameterChangedHandler;
+    }
 
     _state = new HulpState();
     _state.PropertyChanged += StatePropertyChangedCallback;
@@ -65,7 +69,7 @@ public class HulpMonitor
     }).ToArray();
   }
 
-  private void DeviceParameterChangedHandler(object? sender, ParamterChangedEventArgs e)
+  private void DeviceParameterChangedHandler(object? sender, ParameterChangedEventArgs e)
   {
     var mp = _monitoredParameters.FirstOrDefault(mp => mp.Index == e.ParameterIndex);
     if (mp is null) return;
@@ -113,7 +117,10 @@ public class HulpMonitor
     if (e.PropertyName is nameof(state.Percentage) or "")
     {
       _osc.WriteAsync(state.Percentage.ToOscMessage(baseAddress + "/value"));
-      _controlDevice.SetParameter(state.Index, (int)(state.Percentage * 127));
+      foreach (var device in _devices)
+      {
+        device.SetParameter(state.Index, (int)(state.Percentage * 127));
+      }
     }
   }
 
@@ -215,21 +222,25 @@ public class HulpMonitor
     if (_currentTrack == null)
     {
       _logger.LogDebug("No track selected");
-      _controlDevice.ChangeTrack();
-      return;
+    }
+    else
+    {
+      var paramFactory = new MonitoredParameterFactory(_currentTrack, _logger);
+      _monitoredParameters.AddRange(paramFactory.Build());
+
+      if (_logger.IsEnabled(LogLevel.Debug))
+      {
+        _logger.LogDebug("Track '{track}' selected", _currentTrack.Name);
+        foreach (var item in _monitoredParameters)
+        {
+          _logger.LogDebug("Loaded linked parameter: {lp}", item);
+        }
+      }
     }
 
-    var paramFactory = new MonitoredParameterFactory(_currentTrack, _logger);
-    _monitoredParameters.AddRange(paramFactory.Build());
-    _controlDevice.ChangeTrack();
-
-    if (_logger.IsEnabled(LogLevel.Debug))
+    foreach (var device in _devices)
     {
-      _logger.LogDebug("Track '{track}' selected", _currentTrack.Name);
-      foreach (var item in _monitoredParameters)
-      {
-        _logger.LogDebug("Loaded linked parameter: {lp}", item);
-      }
+      device.ChangeTrack(_currentTrack);
     }
   }
 
@@ -313,7 +324,7 @@ public class HulpMonitor
       _transport = new Transport(Project.Current);
       LoadEvents(_transport);
       FullRefresh();
-      _logger.LogDebug("Loaded song: [{song}]", currentSong?.Name ?? string.Empty);
+      _logger.LogDebug("Loaded song: [{song}]", currentSong?.Name ?? "<none>");
     }
     finally
     {

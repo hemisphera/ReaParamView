@@ -1,11 +1,11 @@
 ﻿namespace Hemisphera.Hulp.Plugin.Devices;
 
-public readonly struct ParamterChangedEventArgs
+public readonly struct ParameterChangedEventArgs
 {
   public int ParameterIndex { get; }
   public int Value { get; }
 
-  public ParamterChangedEventArgs(int parameterIndex, int value)
+  public ParameterChangedEventArgs(int parameterIndex, int value)
   {
     ParameterIndex = parameterIndex;
     Value = value;

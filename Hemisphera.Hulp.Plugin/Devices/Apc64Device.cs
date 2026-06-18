@@ -17,8 +17,6 @@ public class Apc64Device : IDevice
   private MidiDevice? _inputDevice;
   private MidiDevice? _outputDevice;
   private readonly MidiListener _midiListener;
-  private bool _inputDeviceLoaded;
-  private bool _outputDeviceLoaded;
 
 
   public Apc64Device(IOptionsMonitor<LooperSettings> settings, ILogger<Apc64Device> logger, MidiListener midiListener)
@@ -31,28 +29,36 @@ public class Apc64Device : IDevice
 
   private void MidiListenerOnMidiReceived(object? sender, MidiEvent e)
   {
-    if (!_inputDeviceLoaded)
-    {
-      var deviceName = _settings.Get(null).MidiInputDeviceName;
-      _inputDevice = MidiDevice.EnumerateInputs().FirstOrDefault(d => d.Name == deviceName);
-      if (_inputDevice == null) _logger.LogWarning("No MIDI input device found with name '{deviceName}'", deviceName);
-      _logger.LogDebug("Using input device {name} id {id}", _outputDevice?.Name, _inputDevice?.Id ?? -1);
-      _inputDeviceLoaded = true;
-    }
-
     if (_inputDevice == null) return;
     if (e.DeviceIndex != _inputDevice.Id) return;
 
-    if ((e.Status & 0x0F) != MidiChannel - 1) return; // MIDI channel 2
-    if (e.Status >> 4 != 11) return; // CC
+    if (e.Channel != MidiChannel - 1) return; // MIDI channel 2
+    if (e.Message != 11) return; // CC
     if (e.Data1 is < FirstCcNumber or > FirstCcNumber + ParameterCount) return;
-    var args = new ParamterChangedEventArgs(e.Data1 - FirstCcNumber, e.Data2);
+    var args = new ParameterChangedEventArgs(e.Data1 - FirstCcNumber, e.Data2);
     _logger.LogDebug("Received CC {no} value {val}", args.ParameterIndex, args.Value);
     ParameterChanged?.Invoke(this, args);
   }
 
 
-  public void ChangeTrack()
+  public void Connect()
+  {
+    var deviceName = _settings.Get(null).MidiInputDeviceName;
+    _inputDevice = MidiDevice.EnumerateInputs().FirstOrDefault(d => d.Name == deviceName);
+    if (_inputDevice == null)
+      _logger.LogWarning("No MIDI input device found with name '{deviceName}'", deviceName);
+    else
+      _logger.LogDebug("Using input device {name} id {id}", _outputDevice?.Name, _inputDevice?.Id ?? -1);
+
+    deviceName = _settings.Get(null).MidiOutputDeviceName;
+    _outputDevice = MidiDevice.EnumerateOutput().FirstOrDefault(d => d.Name == deviceName);
+    if (_outputDevice == null)
+      _logger.LogWarning("No MIDI output device found with name '{deviceName}'", deviceName);
+    else
+      _logger.LogDebug("Using output device {name} id {id}", _outputDevice?.Name, _outputDevice?.Id ?? -1);
+  }
+
+  public void ChangeTrack(Track? currentTrack)
   {
     for (var i = 0; i < ParameterCount; i++)
     {
@@ -62,15 +68,6 @@ public class Apc64Device : IDevice
 
   public void SetParameter(int index, int value)
   {
-    if (!_outputDeviceLoaded)
-    {
-      var deviceName = _settings.Get(null).MidiOutputDeviceName;
-      _outputDevice = MidiDevice.EnumerateOutput().FirstOrDefault(d => d.Name == deviceName);
-      if (_outputDevice == null) _logger.LogWarning("No MIDI output device found with name '{deviceName}'", deviceName);
-      _logger.LogDebug("Using output device {name} id {id}", _outputDevice?.Name, _outputDevice?.Id ?? -1);
-      _outputDeviceLoaded = true;
-    }
-
     if (_outputDevice == null) return;
 
     var ccNo = index + FirstCcNumber;
@@ -82,5 +79,5 @@ public class Apc64Device : IDevice
       value);
   }
 
-  public event EventHandler<ParamterChangedEventArgs>? ParameterChanged;
+  public event EventHandler<ParameterChangedEventArgs>? ParameterChanged;
 }

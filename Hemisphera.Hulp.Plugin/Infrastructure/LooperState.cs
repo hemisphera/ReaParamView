@@ -1,12 +1,12 @@
 using System.Diagnostics;
-using Hemisphera.Hulp.Plugin.Infrastructure;
+using Hemisphera.Hulp.Plugin.Models;
 using Hemisphera.Hulp.Plugin.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ReaSharp;
 using ReaSharp.Models;
 
-namespace Hemisphera.Hulp.Plugin.Models;
+namespace Hemisphera.Hulp.Plugin.Infrastructure;
 
 public class LooperState : ObservedEntity
 {
@@ -157,7 +157,6 @@ public class LooperState : ObservedEntity
 
   public async Task FocusSong(TimeSpan? time = null)
   {
-    _logger.LogDebug("Focus region");
     await Initialize(time);
     if (CurrentSong == null) return;
     _transport.Project.SetSelection(CurrentSong.Region);
