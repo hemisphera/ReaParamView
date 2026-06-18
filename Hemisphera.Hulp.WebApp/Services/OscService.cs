@@ -24,6 +24,9 @@ public class OscService : BackgroundService
   public FxParameter[] FxParameters { get; }
   public event Action? FxParametersChanged;
 
+  // Per-parameter value debouncers (value + value/str only; name/track update immediately).
+  private readonly FxValueDebouncer[] _fxDebouncers;
+
   // Transport
   public TransportState Transport { get; } = new();
   public event Action? TransportChanged;
@@ -58,6 +61,7 @@ public class OscService : BackgroundService
     _tracks = Enumerable.Range(0, Constants.NoOfTracks).Select(i => new TrackInfo(i)).ToArray();
     _events = Enumerable.Range(0, 24).Select(_ => new UpcomingEvent()).ToArray();
     FxParameters = Enumerable.Range(0, Constants.NoOfParameters).Select(index => new FxParameter(index)).ToArray();
+    _fxDebouncers = FxParameters.Select(p => new FxValueDebouncer(p, () => FxParametersChanged?.Invoke())).ToArray();
   }
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -76,15 +80,13 @@ public class OscService : BackgroundService
     server.RegisterHandler(@"^/hulp/track/curr/fx/(\d+)/value/str$", ctx =>
     {
       var slot = int.Parse(ctx.Match.Groups[1].Value);
-      FxParameters[slot - 1].FormattedValue = ctx.Message.Atoms.LastOrDefault().StringValue ?? string.Empty;
-      FxParametersChanged?.Invoke();
+      _fxDebouncers[slot - 1].ScheduleFormatted(ctx.Message.Atoms.LastOrDefault().StringValue ?? string.Empty);
     });
 
     server.RegisterHandler(@"^/hulp/track/curr/fx/(\d+)/value$", ctx =>
     {
       var slot = int.Parse(ctx.Match.Groups[1].Value);
-      FxParameters[slot - 1].Percentage = ctx.Message.Atoms.FirstOrDefault().Double64Value;
-      FxParametersChanged?.Invoke();
+      _fxDebouncers[slot - 1].SchedulePercentage(ctx.Message.Atoms.FirstOrDefault().Double64Value);
     });
 
 
@@ -199,5 +201,12 @@ public class OscService : BackgroundService
   private void UpdateEvents()
   {
     UpcomingEventsChanged?.Invoke();
+  }
+
+  public override void Dispose()
+  {
+    foreach (var d in _fxDebouncers)
+      d.Dispose();
+    base.Dispose();
   }
 }
