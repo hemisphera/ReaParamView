@@ -1,5 +1,4 @@
-﻿using Hemisphera.Hulp.Plugin.Settings;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ReaSharp;
 using ReaSharp.Models;
@@ -12,14 +11,14 @@ public class Apc64Device : IDevice
   private const int FirstCcNumber = 14;
   private const int ParameterCount = 8;
 
-  private readonly IOptionsMonitor<LooperSettings> _settings;
+  private readonly IOptionsMonitor<Apc64DeviceSettings> _settings;
   private readonly ILogger<Apc64Device> _logger;
   private MidiDevice? _inputDevice;
   private MidiDevice? _outputDevice;
   private readonly MidiListener _midiListener;
 
 
-  public Apc64Device(IOptionsMonitor<LooperSettings> settings, ILogger<Apc64Device> logger, MidiListener midiListener)
+  public Apc64Device(IOptionsMonitor<Apc64DeviceSettings> settings, ILogger<Apc64Device> logger, MidiListener midiListener)
   {
     _settings = settings;
     _logger = logger;

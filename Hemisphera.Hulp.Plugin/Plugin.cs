@@ -41,7 +41,11 @@ public static class Plugin
         sc.AddSingleton<ChannelReader<IMessage>>(sp => sp.GetRequiredService<Channel<IMessage>>().Reader);
         sc.AddSingleton<IOscWriter, ChannelOscWriter>();
 
-        sc.AddSingleton<IDevice, Apc64Device>();
+        if (context.Configuration.GetSection("Devices:Apc64").Exists())
+        {
+          sc.Configure<Apc64DeviceSettings>(context.Configuration.GetSection("Devices:Apc64"));
+          sc.AddSingleton<IDevice, Apc64Device>();
+        }
 
         sc.Configure<LooperSettings>(context.Configuration.GetSection(nameof(LooperSettings)));
         sc.AddSingleton<ICommandRegistry, DefaultCommandRegistry>();

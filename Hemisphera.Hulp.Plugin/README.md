@@ -47,6 +47,27 @@ Create this file in your user profile directory to customize monitoring and UDP 
 }
 ```
 
+### Device Configuration
+
+Devices are registered only when their corresponding configuration section is present under `Devices`. A device whose section is absent is not constructed and will not appear in the list of active devices, so the `HULP_RECONNECT_DEVICES` action only touches devices that are actually configured.
+
+```json
+{
+  "Devices": {
+    "Apc64": {
+      "MidiInputDeviceName": "MIDIIN4 (APC64)",
+      "MidiOutputDeviceName": "MIDIOUT4 (APC64)"
+    }
+  }
+}
+```
+
+| Section | Settings Class | Purpose |
+|---|---|---|
+| `Devices:Apc64` | `Apc64DeviceSettings` | APC64 MIDI input/output device names |
+
+To disable the APC64 device entirely, remove (or comment out) the `Devices:Apc64` section.
+
 ### Configuration Options
 
 | Setting | Default | Description |
