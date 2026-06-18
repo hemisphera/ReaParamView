@@ -1,0 +1,72 @@
+@page "/phone"
+@rendermode InteractiveServer
+@inject Hemisphera.Hulp.WebApp.Services.OscService OscService
+@using Hemisphera.Hulp.Shared
+@implements IDisposable
+
+<PageTitle>ReaParamView · Phone</PageTitle>
+
+<div class="phone">
+    <div class="phone-header phone-header--@_statusClass">
+        <div class="phone-header-song" title="@OscService.Transport.SongName">
+            @(string.IsNullOrWhiteSpace(OscService.Transport.SongName) ? "—" : OscService.Transport.SongName)
+        </div>
+        <div class="phone-header-track" title="@OscService.CurrentTrackName">
+            @(string.IsNullOrWhiteSpace(OscService.CurrentTrackName) ? "—" : OscService.CurrentTrackName)
+        </div>
+    </div>
+
+    <div class="phone-grid">
+        @for (var slot = 0; slot < Constants.NoOfParameters; slot++)
+        {
+            var param = OscService.FxParameters[slot];
+            var pct = Math.Clamp(param.Percentage, 0.0, 1.0) * 100.0;
+            if (!string.IsNullOrEmpty(param.Name))
+            {
+                <div class="phone-card">
+                    <div class="phone-card-fill"
+                         style="width: @pct.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                    <div class="phone-card-name" title="@param.Name">@param.Name</div>
+                    <div class="phone-card-row">
+                        <span class="phone-card-value">@param.FormattedValue</span>
+                        <span class="phone-card-pct">@pct.ToString("F0")%</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="phone-card phone-card-empty"></div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private string _statusClass = "idle";
+
+    protected override void OnInitialized()
+    {
+        OscService.TransportChanged += Refresh;
+        OscService.FxParametersChanged += Refresh;
+        UpdateStatus();
+    }
+
+    private void Refresh()
+    {
+        UpdateStatus();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateStatus()
+    {
+        if (OscService.Transport.IsRecording) _statusClass = "recording";
+        else if (OscService.Transport.IsPlaying) _statusClass = "playing";
+        else _statusClass = "idle";
+    }
+
+    public void Dispose()
+    {
+        OscService.TransportChanged -= Refresh;
+        OscService.FxParametersChanged -= Refresh;
+    }
+}
