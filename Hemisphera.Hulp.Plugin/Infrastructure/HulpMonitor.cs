@@ -38,7 +38,8 @@ public class HulpMonitor
     foreach (var device in _devices)
     {
       device.Connect();
-      device.ParameterChanged += DeviceParameterChangedHandler;
+      device.ParameterChanged += DeviceOnParameterChangedHandler;
+      device.ActiveTrackChanged += DeviceOnActiveTrackChanged;
     }
 
     _state = new HulpState();
@@ -69,12 +70,29 @@ public class HulpMonitor
     }).ToArray();
   }
 
-  private void DeviceParameterChangedHandler(object? sender, ParameterChangedEventArgs e)
+  private void DeviceOnParameterChangedHandler(object? sender, ParameterChangedEventArgs e)
   {
     var mp = _monitoredParameters.FirstOrDefault(mp => mp.Index == e.ParameterIndex);
     if (mp is null) return;
     var fxp = mp.Source.GetParameter();
     fxp.NormalizedValue = e.Value / 127.0;
+  }
+
+  private void DeviceOnActiveTrackChanged(object? sender, ActiveTrackChangedEventArgs e)
+  {
+    if (e.TrackIndex < 0)
+    {
+      var selectedTrack = Project.Current.GetSelectedTracks();
+      foreach (var track in selectedTrack)
+      {
+        track.Selected = false;
+      }
+    }
+    else
+    {
+      if (e.TrackIndex < 0 || e.TrackIndex >= _currentSong?.Tracks.Length) return;
+      _currentSong?.Tracks[e.TrackIndex].SelectExclusive();
+    }
   }
 
 
@@ -180,9 +198,9 @@ public class HulpMonitor
   {
     try
     {
-      while (!token.IsCancellationRequested)
+      using var pt = new PeriodicTimer(TimeSpan.FromMicroseconds(50));
+      while (await pt.WaitForNextTickAsync(token))
       {
-        await Task.Delay(50, token);
         try
         {
           await _lock.WaitAsync(token);
@@ -238,9 +256,10 @@ public class HulpMonitor
       }
     }
 
+    var currTrackIndex = _currentSong?.Tracks.IndexOf(_currentTrack) ?? -1;
     foreach (var device in _devices)
     {
-      device.ChangeTrack(_currentTrack);
+      device.SetActiveTrack(currTrackIndex);
     }
   }
 

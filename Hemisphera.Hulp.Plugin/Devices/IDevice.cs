@@ -4,8 +4,9 @@ namespace Hemisphera.Hulp.Plugin.Devices;
 
 public interface IDevice
 {
-  void ChangeTrack(Track? currentTrack);
   void SetParameter(int index, int value);
+  void SetActiveTrack(int index);
   event EventHandler<ParameterChangedEventArgs>? ParameterChanged;
+  event EventHandler<ActiveTrackChangedEventArgs>? ActiveTrackChanged;
   void Connect();
 }
