@@ -32,7 +32,7 @@ public class Apc64Device : IDevice
     if (e.DeviceIndex != _inputDevice.Id) return;
 
     if (e.Channel != MidiChannel - 1) return; // MIDI channel 2
-    if (e.Message != 11) return; // CC
+    if (e.MessageType != 11) return; // CC
     if (e.Data1 is < FirstCcNumber or > FirstCcNumber + ParameterCount) return;
     var args = new ParameterChangedEventArgs(e.Data1 - FirstCcNumber, e.Data2);
     _logger.LogDebug("Received CC {no} value {val}", args.ParameterIndex, args.Value);
