@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Hsp.Osc" Version="0.0.28" />
+        <PackageReference Include="Hsp.Osc" Version="0.0.29" />
     </ItemGroup>
 
     <ItemGroup>

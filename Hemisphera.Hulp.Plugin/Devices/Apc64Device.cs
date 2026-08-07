@@ -87,11 +87,7 @@ public class Apc64Device : IDevice
 
     var ccNo = index + FirstCcNumber;
     _logger.LogDebug("Setting CC {ccNo} id {value}", ccNo, value);
-    Reaper.StuffMIDIMessage.Invoke(
-      _outputDevice.Id + 16,
-      0xb0 + (MidiChannel - 1),
-      ccNo,
-      value);
+    _outputDevice.SendCc(MidiChannel - 1, ccNo, value);
   }
 
   public void SetActiveTrack(int index)
